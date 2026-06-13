@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Observer Dashboard{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-6">
+    <div class="flex items-center gap-3 mb-6">
+        <i class="fas fa-eye text-3xl" style="color: #C9912B;"></i>
+        <h1 class="text-2xl font-bold" style="color: #1A2B4A;">Observer Dashboard</h1>
+    </div>
+
+    {% if cohorts %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for cohort in cohorts %}
+        <a href="/cohorts/{{ cohort.id }}" class="block bg-white rounded-lg shadow border border-gray-200 p-6 transition hover:shadow-lg hover:-translate-y-0.5">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">{{ cohort.name }}</h3>
+                <i class="fas fa-chevron-right text-gray-300"></i>
+            </div>
+            <div class="space-y-2 text-sm text-gray-600">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-book w-4" style="color: #C9912B;"></i>
+                    <span>{{ cohort.course.title if cohort.course else 'No course assigned' }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-user-graduate w-4" style="color: #C9912B;"></i>
+                    <span>{{ cohort.enrolment_count if cohort.enrolment_count is defined else cohort.enrolments|length }} learners</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-calendar w-4" style="color: #C9912B;"></i>
+                    <span>{{ cohort.start_date.strftime('%d %b %Y') if cohort.start_date else 'TBA' }} — {{ cohort.end_date.strftime('%d %b %Y') if cohort.end_date else 'TBA' }}</span>
+                </div>
+            </div>
+            {% if cohort.description %}
+            <p class="mt-3 text-xs text-gray-400 line-clamp-2">{{ cohort.description }}</p>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-white rounded-lg shadow border border-gray-200 p-12 text-center">
+        <i class="fas fa-users-slash text-5xl text-gray-300 mb-4"></i>
+        <p class="text-gray-500">No cohorts available for observation.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

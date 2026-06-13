@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block title %}{{ message.subject }}{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <a href="/messages" class="text-blue-600 hover:underline text-sm">&larr; Back to Messages</a>
+  <div class="bg-white rounded-lg shadow p-6 mt-4">
+    <h1 class="text-xl font-bold mb-2">{{ message.subject }}</h1>
+    <p class="text-xs text-gray-400 mb-4">{{ message.sent_at.strftime('%d %b %Y at %H:%M') }}</p>
+    <div class="prose max-w-none text-sm whitespace-pre-wrap">{{ message.body }}</div>
+    <form method="POST" action="/messages/{{ message.id }}/delete" class="mt-6" data-confirm="Are you sure you want to delete this message? This cannot be undone.">
+    <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+      <button type="submit" class="btn btn-danger text-red-500 text-sm hover:underline">Delete</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

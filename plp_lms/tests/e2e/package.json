@@ -1,0 +1,14 @@
+{
+  "name": "plp-lms-e2e-tests",
+  "version": "1.0.0",
+  "description": "Playwright E2E test suite for PLP Learning Management System",
+  "scripts": {
+    "test": "playwright test --reporter=list",
+    "test:headed": "playwright test --headed --reporter=list",
+    "test:debug": "playwright test --debug",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0"
+  }
+}

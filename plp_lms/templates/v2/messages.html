@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block title %}Messages{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <h1 class="text-2xl font-bold mb-4">Messages</h1>
+  {% if messages %}
+  <div class="bg-white rounded-lg shadow overflow-hidden">
+    <ul class="divide-y">
+      {% for m in messages %}
+      <li class="p-4 hover:bg-gray-50 {{ 'font-semibold' if not m.is_read else '' }}">
+        <a href="/messages/{{ m.id }}" class="flex justify-between items-start">
+          <div class="flex-1">
+            <p class="text-sm">{{ m.subject }}</p>
+            <p class="text-xs text-gray-500 mt-1">{{ m.body[:120] }}{% if m.body|length > 120 %}...{% endif %}</p>
+          </div>
+          <div class="text-xs text-gray-400 ml-4 whitespace-nowrap">
+            {{ m.sent_at.strftime('%d %b %Y %H:%M') }}
+          </div>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% else %}
+  <p class="text-gray-500">No messages.</p>
+  {% endif %}
+</div>
+{% endblock %}

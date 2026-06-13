@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+{% block title %}Claim Skill{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <h1 class="text-2xl font-bold mb-2">Claim Skill</h1>
+  <p class="text-gray-600 mb-6">{{ skill.title }}</p>
+  {% if skill.how_to_demonstrate %}
+  <div class="bg-blue-50 border border-blue-200 rounded p-3 mb-4 text-sm text-blue-800">
+    <strong>How to demonstrate:</strong> {{ skill.how_to_demonstrate }}
+  </div>
+  {% endif %}
+  <form method="POST" action="/skills/claim/{{ skill.id }}" enctype="multipart/form-data" class="bg-white rounded-lg shadow p-6 space-y-4">
+    <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+    <div>
+      <label for="claim_comment" class="block text-sm font-medium mb-1">Your Statement / Comment</label>
+      <textarea id="claim_comment" name="claim_comment" rows="4" required aria-required="true" class="w-full border rounded px-3 py-2"></textarea>
+    </div>
+    <div>
+      <label for="file" class="block text-sm font-medium mb-1">Evidence File (optional)</label>
+      <input type="file" id="file" name="file" class="w-full border rounded px-3 py-2">
+      <p class="text-xs text-gray-400 mt-1">PDF, image, or document</p>
+    </div>
+    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Submit Claim</button>
+  </form>
+</div>
+{% endblock %}

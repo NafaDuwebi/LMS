@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block title %}RPL Claim{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <h1 class="text-2xl font-bold mb-2">RPL Claim</h1>
+  <p class="text-gray-500 mb-6">{{ course.title }}</p>
+  <form method="POST" action="/rpl/claim/{{ course.id }}" enctype="multipart/form-data" class="bg-white rounded-lg shadow p-6 space-y-4">
+    <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+    <div>
+      <label for="prior_title" class="block text-sm font-medium mb-1">Prior Qualification / Course Title</label>
+      <input type="text" id="prior_title" name="prior_title" required aria-required="true" class="w-full border rounded px-3 py-2">
+    </div>
+    <div>
+      <label for="prior_provider" class="block text-sm font-medium mb-1">Provider / Institution</label>
+      <input type="text" id="prior_provider" name="prior_provider" class="w-full border rounded px-3 py-2">
+    </div>
+    <div>
+      <label for="completion_date" class="block text-sm font-medium mb-1">Completion Date</label>
+      <input type="date" id="completion_date" name="completion_date" class="w-full border rounded px-3 py-2">
+    </div>
+    <div>
+      <label for="statement" class="block text-sm font-medium mb-1">Statement of Equivalence</label>
+      <textarea id="statement" name="statement" rows="4" class="w-full border rounded px-3 py-2" placeholder="Describe how your prior learning maps to this course..."></textarea>
+    </div>
+    <div>
+      <label for="file" class="block text-sm font-medium mb-1">Evidence (PDF or image)</label>
+      <input type="file" id="file" name="file" class="w-full border rounded px-3 py-2">
+    </div>
+    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Submit RPL Claim</button>
+  </form>
+</div>
+{% endblock %}

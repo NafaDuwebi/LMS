@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Verify Certificate{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-12">
+    <div class="text-center mb-8">
+        <i class="fas fa-shield-alt text-5xl mb-4" style="color: #1A2B4A;"></i>
+        <h1 class="text-3xl font-bold" style="color: #1A2B4A;">Certificate Verification</h1>
+        <p class="text-gray-500 mt-2">Verify the authenticity of a PLP certificate</p>
+    </div>
+
+    <form method="GET" action="{{ '/certificates/verify' }}" class="bg-white rounded-lg shadow border border-gray-200 p-6 mb-8">
+    <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+        <div class="flex gap-3">
+            <input type="text" name="certificate_number" id="certificate_number" value="{{ request.query_params.get('certificate_number', '') }}" placeholder="Enter certificate number" required aria-required="true" aria-label="Certificate number" class="flex-1 border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2" style="focus:ring-color: #C9912B;">
+            <button type="submit" class="px-6 py-2 rounded text-white font-medium hover:opacity-90" style="background-color: #C9912B;">
+                <i class="fas fa-search mr-1"></i>Verify
+            </button>
+        </div>
+    </form>
+
+    {% if certificate is not none %}
+    <div class="bg-white rounded-lg shadow border-2 {% if valid %}border-green-500{% else %}border-red-500{% endif %} p-8 text-center">
+        {% if valid %}
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 text-green-700 font-bold text-lg mb-6">
+            <i class="fas fa-check-circle"></i>
+            <span>VALID CERTIFICATE</span>
+        </div>
+        <div class="border-t border-gray-100 pt-6 space-y-3 text-left max-w-sm mx-auto">
+            <div class="flex justify-between">
+                <span class="text-gray-500">Certificate No.</span>
+                <span class="font-semibold text-gray-900">{{ certificate.certificate_number }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Learner</span>
+                <span class="font-semibold text-gray-900">{{ certificate.learner_name if certificate.learner_name else certificate.user.full_name }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Course</span>
+                <span class="font-semibold text-gray-900">{{ certificate.course.title }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Issue Date</span>
+                <span class="font-semibold text-gray-900">{{ certificate.issued_at.strftime('%d %b %Y') if certificate.issued_at else '-' }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Expiry Date</span>
+                <span class="font-semibold text-gray-900">{{ certificate.expiry_date.strftime('%d %b %Y') if certificate.expiry_date else 'N/A' }}</span>
+            </div>
+        </div>
+        {% else %}
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-100 text-red-700 font-bold text-lg mb-4">
+            <i class="fas fa-times-circle"></i>
+            <span>INVALID CERTIFICATE</span>
+        </div>
+        <p class="text-gray-600">No valid certificate matches the provided number.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

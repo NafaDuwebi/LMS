@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PLP Learning Management System{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1A2B4A',
+                        accent: '#C9912B',
+                        'primary-light': '#2A3F6A',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s infinite; }
+        @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .skip-link { position: absolute; left: -9999px; z-index: 9999; background: #1A2B4A; color: #fff; padding: 0.5rem 1rem; text-decoration: none; }
+        .skip-link:focus { left: 0; top: 0; }
+        .toast { position: fixed; top: 1rem; right: 1rem; z-index: 9999; }
+        .module-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.2s; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    {% if user %}
+    <nav class="bg-primary text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-8">
+                    <a href="/dashboard" class="flex items-center space-x-2 shrink-0">
+                        <i class="fas fa-graduation-cap text-accent text-lg"></i>
+                        <span class="text-lg font-bold tracking-tight whitespace-nowrap">PLP LMS</span>
+                    </a>
+                    {% if user.role in ['superadmin', 'trainer'] %}
+                    <div class="hidden md:flex space-x-4">
+                        <a href="/dashboard" class="px-3 py-2 text-sm hover:text-accent transition">Dashboard</a>
+                        <a href="/courses" class="px-3 py-2 text-sm hover:text-accent transition">Courses</a>
+                        <a href="/cohorts" class="px-3 py-2 text-sm hover:text-accent transition">Cohorts</a>
+                        <a href="/assessments" class="px-3 py-2 text-sm hover:text-accent transition">Assessments</a>
+                        <a href="/learning-paths" class="px-3 py-2 text-sm hover:text-accent transition">Paths</a>
+                        <a href="/reports" class="px-3 py-2 text-sm hover:text-accent transition">Reports</a>
+                        <a href="/messages" class="px-3 py-2 text-sm hover:text-accent transition">Messages</a>
+                        {% if user.role == 'superadmin' %}
+                        <a href="/admin/users" class="px-3 py-2 text-sm hover:text-accent transition">Users</a>
+                        <a href="/admin/settings" class="px-3 py-2 text-sm hover:text-accent transition">Settings</a>
+                        <a href="/admin/retention" class="px-3 py-2 text-sm hover:text-accent transition">Retention</a>
+                        <a href="/reports/subscriptions" class="px-3 py-2 text-sm hover:text-accent transition">Subscriptions</a>
+                        {% endif %}
+                    </div>
+                    {% elif user.role == 'learner' %}
+                    <div class="hidden md:flex space-x-4">
+                        <a href="/dashboard" class="px-3 py-2 text-sm hover:text-accent transition">Dashboard</a>
+                        <a href="/learner/courses" class="px-3 py-2 text-sm hover:text-accent transition">My Courses</a>
+                        <a href="/learning-paths" class="px-3 py-2 text-sm hover:text-accent transition">Paths</a>
+                        <a href="/skills/my" class="px-3 py-2 text-sm hover:text-accent transition">Skills</a>
+                        <a href="/learner/training-record" class="px-3 py-2 text-sm hover:text-accent transition">Training Record</a>
+                        <a href="/learner/results" class="px-3 py-2 text-sm hover:text-accent transition">Results</a>
+                        <a href="/learner/certificates" class="px-3 py-2 text-sm hover:text-accent transition">Certificates</a>
+                        <a href="/messages" class="px-3 py-2 text-sm hover:text-accent transition">Messages</a>
+                    </div>
+                    {% elif user.role == 'observer' %}
+                    <div class="hidden md:flex space-x-4">
+                        <a href="/dashboard" class="px-3 py-2 text-sm hover:text-accent transition">Dashboard</a>
+                        <a href="/observer/cohorts" class="px-3 py-2 text-sm hover:text-accent transition">Cohorts</a>
+                        <a href="/observer/courses" class="px-3 py-2 text-sm hover:text-accent transition">Courses</a>
+                        <a href="/reports" class="px-3 py-2 text-sm hover:text-accent transition">Reports</a>
+                    </div>
+                    {% elif user.role == 'external_assessor' %}
+                    <div class="hidden md:flex space-x-4">
+                        <a href="/dashboard" class="px-3 py-2 text-sm hover:text-accent transition">Dashboard</a>
+                        <a href="/external-assessor/skills" class="px-3 py-2 text-sm hover:text-accent transition">Skills Review</a>
+                        <a href="/external-assessor/assessments" class="px-3 py-2 text-sm hover:text-accent transition">Assessments</a>
+                        <a href="/reports" class="px-3 py-2 text-sm hover:text-accent transition">Reports</a>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/notifications" class="relative hover:text-accent transition">
+                        <i class="fas fa-bell text-lg"></i>
+                        {% if unread_count and unread_count > 0 %}
+                        <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ unread_count }}</span>
+                        {% endif %}
+                    </a>
+                    <div class="relative group">
+                        <button class="flex items-center space-x-2 hover:text-accent transition py-2">
+                            <i class="fas fa-user-circle text-lg"></i>
+                            <span class="text-sm">{{ user.full_name }}</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        <div class="absolute right-0 w-48 bg-white text-gray-800 rounded-md shadow-lg hidden group-hover:block z-50 pt-1">
+                            {% if user.role == 'learner' %}
+                            <a href="/learner/profile" class="block px-4 py-2 text-sm hover:bg-gray-100"><i class="fas fa-user mr-2"></i>Profile</a>
+                            {% endif %}
+                            <a href="/auth/logout" class="block px-4 py-2 text-sm hover:bg-gray-100 text-red-600"><i class="fas fa-sign-out-alt mr-2"></i>Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    {% if success %}
+    <div class="toast" id="toast">
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative shadow-lg">
+            <i class="fas fa-check-circle mr-2"></i>{{ success }}
+        </div>
+    </div>
+    {% endif %}
+    {% if error %}
+    <div class="toast" id="toast">
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative shadow-lg">
+            <i class="fas fa-exclamation-circle mr-2"></i>{{ error }}
+        </div>
+    </div>
+    {% endif %}
+    {% set flash_msg = request.state.flash_msg %}
+    {% if flash_msg %}
+    <div class="toast" id="toast">
+        <div class="px-4 py-3 rounded relative shadow-lg {% if flash_msg.category == 'success' %}bg-green-100 border border-green-400 text-green-700{% elif flash_msg.category == 'error' %}bg-red-100 border border-red-400 text-red-700{% else %}bg-blue-100 border border-blue-400 text-blue-700{% endif %}">
+            <i class="fas fa-{% if flash_msg.category == 'success' %}check-circle{% elif flash_msg.category == 'error' %}exclamation-circle{% else %}info-circle{% endif %} mr-2"></i>{{ flash_msg.message }}
+        </div>
+    </div>
+    {% endif %}
+
+    <main id="main-content" class="max-w-7xl mx-auto px-4 py-6">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-primary text-white text-center py-4 mt-8">
+        <p class="text-sm text-gray-300">&copy; 2026 PL Projects Ltd. All rights reserved.</p>
+        <p class="text-xs text-gray-400 mt-1">B Corp Certified Project Management Consultancy</p>
+    </footer>
+
+    <script>
+        const toast = document.getElementById('toast');
+        if (toast) { setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.5s'; setTimeout(() => toast.remove(), 500); }, 3000); }
+        document.querySelectorAll("[data-confirm]").forEach(function(form) {
+            form.addEventListener("submit", function(e) {
+                if (!confirm(form.dataset.confirm)) e.preventDefault();
+            });
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

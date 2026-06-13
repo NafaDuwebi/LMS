@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold text-[#1A2B4A]">System Settings</h1>
+    </div>
+
+    {% if success %}
+    <div class="mb-4 px-4 py-3 rounded-lg text-sm font-medium bg-green-50 text-green-700 border border-green-200">
+        <i class="fas fa-check-circle mr-2"></i>{{ success }}
+    </div>
+    {% endif %}
+    {% if error %}
+    <div class="mb-4 px-4 py-3 rounded-lg text-sm font-medium bg-red-50 text-red-700 border border-red-200">
+        <i class="fas fa-exclamation-circle mr-2"></i>{{ error }}
+    </div>
+    {% endif %}
+
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <form method="POST" action="/admin/settings" class="space-y-5">
+    <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+
+            <div>
+                <label for="org_name" class="block text-sm font-medium text-gray-700 mb-1">Organization Name</label>
+                <input type="text" name="org_name" id="org_name" value="{{ settings['org_name'] }}" required aria-required="true"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-transparent outline-none transition-colors">
+            </div>
+
+            <div>
+                <label for="min_attendance" class="block text-sm font-medium text-gray-700 mb-1">Minimum Attendance (%)</label>
+                <input type="number" name="min_attendance" id="min_attendance" value="{{ settings['min_attendance'] }}" min="0" max="100" required aria-required="true"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-transparent outline-none transition-colors">
+            </div>
+
+            <div>
+                <label for="data_retention" class="block text-sm font-medium text-gray-700 mb-1">Data Retention (months)</label>
+                <input type="number" name="data_retention" id="data_retention" value="{{ settings['data_retention'] }}" min="1" required aria-required="true"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-transparent outline-none transition-colors">
+            </div>
+
+            <div>
+                <label for="max_upload" class="block text-sm font-medium text-gray-700 mb-1">Max Upload Size (MB)</label>
+                <input type="number" name="max_upload" id="max_upload" value="{{ settings['max_upload'] }}" min="1" required aria-required="true"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-transparent outline-none transition-colors">
+            </div>
+
+            <div class="pt-2">
+                <button type="submit"
+                        class="px-6 py-2.5 bg-[#1A2B4A] text-white font-medium rounded-lg hover:bg-[#243b60] transition-colors">
+                    <i class="fas fa-save mr-2"></i>Save Settings
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

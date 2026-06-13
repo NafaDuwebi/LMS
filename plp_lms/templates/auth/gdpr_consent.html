@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}PLP LMS - GDPR Consent{% endblock %}
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-12">
+    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-2xl">
+        <div class="text-center mb-8">
+            <i class="fas fa-shield-alt text-5xl text-primary"></i>
+            <h1 class="text-2xl font-bold text-primary mt-4">Data Processing Consent</h1>
+            <p class="text-gray-500 text-sm mt-2">Please review and accept our privacy policy to continue</p>
+        </div>
+        <div class="mb-6 p-4 border border-gray-200 rounded-md bg-gray-50 text-sm text-gray-700 leading-relaxed max-h-80 overflow-y-auto">
+            <h3 class="font-semibold text-gray-900 mb-2">Privacy Policy</h3>
+            <p class="mb-2">PL Projects Ltd collects and processes your personal data for the purposes of delivering training, assessment, and certification through the Learning Management System (LMS).</p>
+            <p class="mb-2"><strong>Data collected:</strong> Name, email address, username, organisation, assessment submissions, course progress, and certificates issued.</p>
+            <p class="mb-2"><strong>Purpose:</strong> To manage your enrolment, track your learning progress, issue certificates, and comply with regulatory training requirements.</p>
+            <p class="mb-2"><strong>Data retention:</strong> Your data will be retained for the duration of your training relationship plus any statutory retention period required by awarding bodies.</p>
+            <p class="mb-2"><strong>Your rights:</strong> You may request access to, correction of, or deletion of your personal data at any time by contacting the data controller.</p>
+            <p class="mb-2"><strong>Sharing:</strong> Your data may be shared with relevant awarding bodies for certification purposes and with regulatory authorities as required by law.</p>
+            <p class="text-xs text-gray-400 mt-4">Last updated: January 2025</p>
+        </div>
+        <form method="POST" action="/auth/gdpr-consent">
+            <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+            <button type="submit" class="w-full bg-primary text-white py-2 rounded-md hover:bg-primary-light transition font-medium">
+                <i class="fas fa-check mr-2"></i>I Accept
+            </button>
+        </form>
+        <p class="text-center text-xs text-gray-400 mt-4">By clicking "I Accept" you consent to the processing of your personal data as described above.</p>
+    </div>
+</div>
+{% endblock %}

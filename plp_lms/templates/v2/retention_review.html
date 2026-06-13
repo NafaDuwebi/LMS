@@ -1,0 +1,80 @@
+{% extends "layout.html" %}
+{% block title %}GDPR Retention Review{% endblock %}
+{% block content %}
+<div class="max-w-6xl mx-auto">
+  <div class="flex justify-between items-center mb-4">
+    <h1 class="text-2xl font-bold">GDPR Retention Review</h1>
+  </div>
+
+  <div class="bg-white rounded-lg shadow mb-6">
+    <div class="p-4 border-b font-semibold text-gray-700">Flagged for Review ({{ flagged|length }})</div>
+    {% if flagged %}
+    <table class="w-full">
+      <thead class="bg-gray-50 text-left text-sm">
+        <tr>
+          <th scope="col" class="p-3">Learner</th>
+          <th scope="col" class="p-3">Cohort</th>
+          <th scope="col" class="p-3">Review Date</th>
+          <th scope="col" class="p-3">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y text-sm">
+        {% for e in flagged %}
+        <tr>
+          <td class="p-3">{{ e.user.full_name }}</td>
+          <td class="p-3">{{ e.cohort.name }}</td>
+          <td class="p-3 text-red-500 font-medium">{{ e.retention_review_date.strftime('%d %b %Y') if e.retention_review_date else 'N/A' }}</td>
+          <td class="p-3 flex gap-2">
+            <form method="POST" action="/admin/retention/anonymise/{{ e.id }}" data-confirm="Are you sure you want to anonymise this record? This cannot be undone.">
+    <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+              <button type="submit" class="btn btn-danger bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600">Anonymise</button>
+            </form>
+            <form method="POST" action="/admin/retention/extend/{{ e.id }}" class="flex gap-1">
+              <label for="years_{{ e.id }}">Extend by:</label>
+              <select id="years_{{ e.id }}" name="years" class="border rounded px-2 py-1 text-xs">
+                <option value="1">+1 year</option>
+                <option value="2">+2 years</option>
+                <option value="3">+3 years</option>
+                <option value="5">+5 years</option>
+              </select>
+              <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600">Extend</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="p-4 text-gray-500">No records flagged for retention review.</p>
+    {% endif %}
+  </div>
+
+  <div class="bg-white rounded-lg shadow">
+    <div class="p-4 border-b font-semibold text-gray-700">Retention Log</div>
+    {% if logs %}
+    <table class="w-full">
+      <thead class="bg-gray-50 text-left text-sm">
+        <tr>
+          <th scope="col" class="p-3">Date</th>
+          <th scope="col" class="p-3">User</th>
+          <th scope="col" class="p-3">Action</th>
+          <th scope="col" class="p-3">Notes</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y text-sm">
+        {% for l in logs %}
+        <tr>
+          <td class="p-3 text-gray-500">{{ l.actioned_at.strftime('%d %b %Y %H:%M') }}</td>
+          <td class="p-3">{{ l.affected_user.full_name if l.affected_user else 'N/A' }}</td>
+          <td class="p-3">{{ l.action }}</td>
+          <td class="p-3 text-gray-500">{{ l.notes or '' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="p-4 text-gray-500">No retention actions logged yet.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

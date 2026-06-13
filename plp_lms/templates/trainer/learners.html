@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}My Learners{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h1 class="text-2xl font-bold text-[#1A2B4A]">My Learners</h1>
+        <div class="flex gap-2">
+            <label for="searchInput" class="sr-only">Search learners</label>
+            <input type="text" id="searchInput" placeholder="Search learners..." class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-[#C9912B] focus:border-[#C9912B] w-64">
+            <label for="statusFilter" class="sr-only">Filter by status</label>
+            <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-[#C9912B] focus:border-[#C9912B]">
+                <option value="">All Statuses</option>
+                <option value="Active">Active</option>
+                <option value="Completed">Completed</option>
+                <option value="Dropped">Dropped</option>
+                <option value="Pending">Pending</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-[#1A2B4A] text-white text-left">
+                        <th scope="col" class="px-6 py-3 font-medium">Name</th>
+                        <th scope="col" class="px-6 py-3 font-medium">Email</th>
+                        <th scope="col" class="px-6 py-3 font-medium">Cohort</th>
+                        <th scope="col" class="px-6 py-3 font-medium">Status</th>
+                        <th scope="col" class="px-6 py-3 font-medium">Final Score</th>
+                        <th scope="col" class="px-6 py-3 font-medium">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200" id="learnersTable">
+                    {% for enrolment in enrolments %}
+                    <tr class="hover:bg-gray-50 transition learner-row" data-name="{{ enrolment.user.full_name|lower }}" data-email="{{ enrolment.user.email|lower }}" data-status="{{ enrolment.status }}">
+                        <td class="px-6 py-4 text-[#1A2B4A] font-medium">{{ enrolment.user.full_name }}</td>
+                        <td class="px-6 py-4 text-gray-600">{{ enrolment.user.email }}</td>
+                        <td class="px-6 py-4 text-gray-600">{{ enrolment.cohort.name }}</td>
+                        <td class="px-6 py-4">
+                            {% set status = enrolment.status|lower %}
+                            {% if status == 'active' %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">{{ enrolment.status }}</span>
+                            {% elif status == 'completed' %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">{{ enrolment.status }}</span>
+                            {% elif status == 'dropped' %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">{{ enrolment.status }}</span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">{{ enrolment.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">{{ enrolment.final_score|default('&mdash;'|safe) }}</td>
+                        <td class="px-6 py-4">
+                            <a href="/trainer/learners/{{ enrolment.id }}" class="text-[#C9912B] hover:underline font-medium text-sm">
+                                <i class="fas fa-eye mr-1"></i>View
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                            <i class="fas fa-user-graduate text-3xl mb-2"></i>
+                            <p>No learners enrolled in your cohorts.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const rows = document.querySelectorAll('.learner-row');
+
+    function filterRows() {
+        const query = searchInput.value.toLowerCase().trim();
+        const status = statusFilter.value.toLowerCase();
+
+        rows.forEach(function(row) {
+            const name = row.dataset.name || '';
+            const email = row.dataset.email || '';
+            const rowStatus = row.dataset.status || '';
+            const matchesSearch = !query || name.includes(query) || email.includes(query);
+            const matchesStatus = !status || rowStatus === status;
+            row.style.display = matchesSearch && matchesStatus ? '' : 'none';
+        });
+    }
+
+    searchInput.addEventListener('input', filterRows);
+    statusFilter.addEventListener('change', filterRows);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
+  <rect width="200" height="60" fill="#1A2B4A" rx="8"/>
+  <text x="20" y="38" font-family="Arial" font-weight="bold" font-size="16" fill="#C9912B">PLP</text>
+  <text x="60" y="38" font-family="Arial" font-size="12" fill="white">LMS</text>
+</svg>

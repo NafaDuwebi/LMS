@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% block title %}Document Requirements{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <div class="flex justify-between items-center mb-4">
+    <h1 class="text-2xl font-bold">Document Requirements: {{ cohort.name }}</h1>
+    <a href="/admin/cohorts/{{ cohort.id }}" class="text-blue-600 hover:underline">Back to Cohort</a>
+  </div>
+
+  <div class="bg-white rounded-lg shadow p-4 mb-6">
+    <h2 class="font-semibold mb-3">Add Requirement</h2>
+    <form method="POST" action="/documents/requirements/{{ cohort.id }}/add" class="space-y-3">
+    <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+      <div>
+        <label for="document_label" class="block text-sm font-medium mb-1">Document Label</label>
+        <input type="text" id="document_label" name="document_label" required aria-required="true" class="w-full border rounded px-3 py-2" placeholder="e.g. ID Document, Qualification Certificate">
+      </div>
+      <div>
+        <label for="instructions" class="block text-sm font-medium mb-1">Instructions</label>
+        <textarea id="instructions" name="instructions" rows="2" class="w-full border rounded px-3 py-2"></textarea>
+      </div>
+      <label for="is_required" class="flex items-center gap-2">
+        <input type="checkbox" id="is_required" name="is_required" value="true">
+        <span class="text-sm">Required (mandatory)</span>
+      </label>
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Add Requirement</button>
+    </form>
+  </div>
+
+  <div class="bg-white rounded-lg shadow">
+    <div class="p-4 border-b font-semibold text-gray-700">Current Requirements</div>
+    {% if requirements %}
+    <ul class="divide-y">
+      {% for r in requirements %}
+      <li class="p-4 flex justify-between items-center">
+        <div>
+          <h3 class="font-medium">{{ r.document_label }}</h3>
+          <p class="text-sm text-gray-500">{{ r.instructions or '' }}</p>
+        </div>
+        <span class="text-xs px-2 py-1 rounded {{ 'bg-red-100 text-red-600' if r.is_required else 'bg-gray-100 text-gray-600' }}">{{ 'Required' if r.is_required else 'Optional' }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="p-4 text-gray-500">No requirements added.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

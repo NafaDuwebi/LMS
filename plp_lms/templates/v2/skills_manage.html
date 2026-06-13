@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+{% block title %}Skills - {{ course.title }}{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <div class="flex justify-between items-center mb-4">
+    <h1 class="text-2xl font-bold">Skills: {{ course.title }}</h1>
+    <a href="/courses/{{ course.id }}" class="text-blue-600 hover:underline">Back to Course</a>
+  </div>
+
+  <div class="bg-white rounded-lg shadow p-4 mb-6">
+    <h2 class="font-semibold mb-3">Add New Skill</h2>
+    <form method="POST" action="/skills/create/{{ course.id }}" class="space-y-3">
+    <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+      <div>
+        <label for="title" class="block text-sm font-medium mb-1">Skill Title</label>
+        <input type="text" id="title" name="title" required aria-required="true" class="w-full border rounded px-3 py-2">
+      </div>
+      <div>
+        <label for="description" class="block text-sm font-medium mb-1">Description</label>
+        <textarea id="description" name="description" rows="3" class="w-full border rounded px-3 py-2"></textarea>
+      </div>
+      <div>
+        <label for="how_to_demonstrate" class="block text-sm font-medium mb-1">How to Demonstrate</label>
+        <textarea id="how_to_demonstrate" name="how_to_demonstrate" rows="3" class="w-full border rounded px-3 py-2" placeholder="What evidence should the learner submit?"></textarea>
+      </div>
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Add Skill</button>
+    </form>
+  </div>
+
+  <div class="bg-white rounded-lg shadow">
+    <div class="p-4 border-b font-semibold text-gray-700">Skills ({{ skills|length }})</div>
+    {% if skills %}
+    <ul class="divide-y">
+      {% for s in skills %}
+      <li class="p-4">
+        <div class="flex justify-between">
+          <div>
+            <h3 class="font-medium">{{ s.title }}</h3>
+            <p class="text-sm text-gray-500">{{ s.description or '' }}</p>
+            {% if s.how_to_demonstrate %}
+            <p class="text-xs text-gray-400 mt-1">Demonstrate: {{ s.how_to_demonstrate }}</p>
+            {% endif %}
+          </div>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="p-4 text-gray-500">No skills defined yet.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

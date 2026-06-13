@@ -1,0 +1,354 @@
+{% extends "base.html" %}
+{% block title %}{{ assessment.title }}{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-6 flex items-center justify-between">
+    <div>
+      <a href="/assessments" class="text-sm text-gray-500 hover:text-[#C9912B] transition">
+        <i class="fas fa-arrow-left mr-1"></i>Back to Assessments
+      </a>
+      <span class="text-gray-300 mx-2">|</span>
+      <a href="/courses/{{ assessment.course_id }}" class="text-sm text-gray-500 hover:text-[#C9912B] transition">
+        <i class="fas fa-book mr-1"></i>View Course
+      </a>
+    </div>
+    {% if user.role == 'learner' %}
+    <a href="/assessments/{{ assessment.id }}/take"
+       class="bg-[#C9912B] hover:bg-[#b07d26] text-white px-6 py-2.5 rounded-lg text-sm font-medium transition inline-flex items-center">
+      <i class="fas fa-pencil-alt mr-2"></i>Take Assessment
+    </a>
+    {% endif %}
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-[#1A2B4A]">{{ assessment.title }}</h1>
+        <p class="text-sm text-gray-500 mt-1">{{ assessment.course.title }}{% if assessment.module_id %} &middot; Module: {{ assessment.module.title }}{% endif %}</p>
+      </div>
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 capitalize self-start">
+        {{ assessment.type | replace('_', ' ') }}
+      </span>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+      <div class="bg-gray-50 rounded-lg p-3">
+        <span class="block text-gray-400 text-xs uppercase tracking-wider">Pass Mark</span>
+        <span class="font-semibold text-[#1A2B4A]">{{ assessment.pass_mark }}%</span>
+      </div>
+      <div class="bg-gray-50 rounded-lg p-3">
+        <span class="block text-gray-400 text-xs uppercase tracking-wider">Max Attempts</span>
+        <span class="font-semibold text-[#1A2B4A]">{{ assessment.max_attempts }}</span>
+      </div>
+      <div class="bg-gray-50 rounded-lg p-3">
+        <span class="block text-gray-400 text-xs uppercase tracking-wider">Time Limit</span>
+        <span class="font-semibold text-[#1A2B4A]">{{ assessment.time_limit_mins ~ ' min' if assessment.time_limit_mins else 'No limit' }}</span>
+      </div>
+      <div class="bg-gray-50 rounded-lg p-3">
+        <span class="block text-gray-400 text-xs uppercase tracking-wider">Questions</span>
+        <span class="font-semibold text-[#1A2B4A]">{{ questions | length }}</span>
+      </div>
+    </div>
+
+    {% if assessment.randomise_questions or assessment.randomise_options or assessment.release_results_immediately %}
+    <div class="flex flex-wrap gap-2 mt-4">
+      {% if assessment.randomise_questions %}<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-purple-50 text-purple-700"><i class="fas fa-random mr-1"></i> Randomise questions</span>{% endif %}
+      {% if assessment.randomise_options %}<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-purple-50 text-purple-700"><i class="fas fa-shuffle mr-1"></i> Randomise options</span>{% endif %}
+      {% if assessment.release_results_immediately %}<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-50 text-green-700"><i class="fas fa-eye mr-1"></i> Results released immediately</span>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  {% if user.role in ('superadmin', 'trainer') %}
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-8">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-lg font-bold text-[#1A2B4A]"><i class="fas fa-question-circle mr-2"></i>Questions</h2>
+      <button onclick="document.getElementById('addQuestionForm').classList.toggle('hidden')"
+              class="text-sm text-[#C9912B] hover:text-[#b07d26] font-medium transition">
+        <i class="fas fa-plus mr-1"></i>Add Question
+      </button>
+    </div>
+
+    <form id="addQuestionForm" method="POST" action="/assessments/{{ assessment.id }}/questions/add" class="hidden mb-8 bg-gray-50 rounded-lg p-4 space-y-4">
+    <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+      <input type="hidden" name="dummy_token" value="dummy">
+      <div>
+        <label for="question_text" class="block text-sm font-medium text-gray-700 mb-1">Question Text</label>
+        <textarea name="question_text" id="question_text" rows="2" required aria-required="true"
+                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-[#C9912B] outline-none transition text-sm"></textarea>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div>
+          <label for="question_type" class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+          <select name="question_type" id="question_type"
+                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-[#C9912B] outline-none transition text-sm bg-white">
+            <option value="mcq">Multiple Choice</option>
+            <option value="written">Written</option>
+            <option value="short_answer">Short Answer</option>
+          </select>
+        </div>
+        <div>
+          <label for="marks" class="block text-sm font-medium text-gray-700 mb-1">Marks</label>
+          <input type="number" name="marks" id="marks" value="1" min="1"
+                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-[#C9912B] outline-none transition text-sm">
+        </div>
+        <div>
+          <label for="order_index" class="block text-sm font-medium text-gray-700 mb-1">Order</label>
+          <input type="number" name="order_index" id="order_index" value="{{ questions | length + 1 }}" min="0"
+                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-[#C9912B] outline-none transition text-sm">
+        </div>
+        <div>
+          <label for="syllabus_area_tag" class="block text-sm font-medium text-gray-700 mb-1">Syllabus Area</label>
+          <input type="text" name="syllabus_area_tag" id="syllabus_area_tag" placeholder="e.g. APM, IRM"
+                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-[#C9912B] outline-none transition text-sm">
+        </div>
+      </div>
+      <div id="mcqOptions" class="space-y-3">
+        <p class="text-sm font-medium text-gray-700">Answer Options (for MCQ)</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label for="option_a" class="block text-xs text-gray-500 mb-1">Option A</label>
+            <input type="text" name="option_a" id="option_a" placeholder="Option A text"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none">
+          </div>
+          <div>
+            <label for="option_b" class="block text-xs text-gray-500 mb-1">Option B</label>
+            <input type="text" name="option_b" id="option_b" placeholder="Option B text"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none">
+          </div>
+          <div>
+            <label for="option_c" class="block text-xs text-gray-500 mb-1">Option C</label>
+            <input type="text" name="option_c" id="option_c" placeholder="Option C text"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none">
+          </div>
+          <div>
+            <label for="option_d" class="block text-xs text-gray-500 mb-1">Option D</label>
+            <input type="text" name="option_d" id="option_d" placeholder="Option D text"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none">
+          </div>
+        </div>
+        <div>
+          <label for="correct_answer" class="block text-sm font-medium text-gray-700 mb-1">Correct Answer</label>
+          <select name="correct_answer" id="correct_answer" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none bg-white">
+            <option value="">Select correct answer</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+          </select>
+        </div>
+      </div>
+
+      <script>
+        (function() {
+          var sel = document.querySelector('select[name="question_type"]');
+          if (sel) {
+            sel.addEventListener('change', function() {
+              document.getElementById('mcqOptions').classList.toggle('hidden', this.value !== 'mcq');
+            });
+            var evt = new Event('change');
+            sel.dispatchEvent(evt);
+          }
+        })();
+        function toggleEditMcq(qId, sel) {
+          var el = document.getElementById('edit-mcq-' + qId);
+          if (el) el.classList.toggle('hidden', sel.value !== 'mcq');
+        }
+      </script>
+
+      <button type="submit"
+              class="px-4 py-2 bg-[#C9912B] hover:bg-[#b07d26] text-white text-sm font-medium rounded-lg transition">
+        <i class="fas fa-plus mr-1"></i>Add Question
+      </button>
+    </form>
+
+    {% if questions %}
+    <div class="space-y-4">
+      {% for q in questions | sort(attribute='order_index') %}
+      <div class="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#1A2B4A] text-white text-xs font-bold">{{ q.order_index }}</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
+                {% if q.question_type == 'mcq' %}bg-blue-50 text-blue-700
+                {% elif q.question_type == 'written' %}bg-green-50 text-green-700
+                {% else %}bg-yellow-50 text-yellow-700{% endif %}">
+                {{ q.question_type | replace('_', ' ') }}
+              </span>
+              <span class="text-xs text-gray-400">{{ q.marks }} mark{{ 's' if q.marks != 1 }}</span>
+            </div>
+            <p class="text-sm text-gray-800">{{ q.question_text }}</p>
+
+            {% if q.answer_options %}
+            <div class="mt-3 space-y-1.5">
+              {% for opt in q.answer_options %}
+              <div class="flex items-center gap-2 text-sm {% if opt.is_correct %}text-green-600 font-medium{% else %}text-gray-600{% endif %}">
+                {% if opt.is_correct %}
+                <i class="fas fa-check-circle text-green-500"></i>
+                {% else %}
+                <i class="far fa-circle text-gray-300"></i>
+                {% endif %}
+                <span>{{ opt.option_text }}</span>
+              </div>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <button onclick="document.getElementById('edit-q-{{ q.id }}').classList.toggle('hidden')"
+                    class="text-gray-300 hover:text-[#C9912B] transition" title="Edit" aria-label="Edit">
+              <i class="fas fa-edit"></i>
+            </button>
+            <form method="POST" action="/assessments/questions/{{ q.id }}/delete" class="inline" data-confirm="Are you sure you want to delete this question? This cannot be undone.">
+              <button type="submit" class="btn btn-danger text-gray-300 hover:text-red-400 transition" title="Delete" aria-label="Delete">
+                <i class="far fa-trash-alt"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Inline Edit Form -->
+        <form id="edit-q-{{ q.id }}" method="POST" action="/assessments/questions/{{ q.id }}/edit" class="hidden mt-4 pt-4 border-t border-gray-200 space-y-4">
+          <input type="hidden" name="dummy_token" value="dummy">
+          <div>
+            <label for="edit-question-text-{{ q.id }}" class="block text-sm font-medium text-gray-700 mb-1">Question Text</label>
+            <textarea name="question_text" id="edit-question-text-{{ q.id }}" rows="2" required aria-required="true"
+                      class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none">{{ q.question_text }}</textarea>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div>
+              <label for="edit-question-type-{{ q.id }}" class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+              <select name="question_type" id="edit-question-type-{{ q.id }}" onchange="toggleEditMcq({{ q.id }}, this)"
+                      class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none bg-white">
+                <option value="mcq" {% if q.question_type == 'mcq' %}selected{% endif %}>Multiple Choice</option>
+                <option value="written" {% if q.question_type == 'written' %}selected{% endif %}>Written</option>
+                <option value="short_answer" {% if q.question_type == 'short_answer' %}selected{% endif %}>Short Answer</option>
+              </select>
+            </div>
+            <div>
+              <label for="edit-marks-{{ q.id }}" class="block text-sm font-medium text-gray-700 mb-1">Marks</label>
+              <input type="number" name="marks" id="edit-marks-{{ q.id }}" value="{{ q.marks }}" min="1"
+                     class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none">
+            </div>
+            <div>
+              <label for="edit-order-{{ q.id }}" class="block text-sm font-medium text-gray-700 mb-1">Order</label>
+              <input type="number" name="order_index" id="edit-order-{{ q.id }}" value="{{ q.order_index }}" min="0"
+                     class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none">
+            </div>
+            <div>
+              <label for="edit-syllabus-{{ q.id }}" class="block text-sm font-medium text-gray-700 mb-1">Syllabus Area</label>
+              <input type="text" name="syllabus_area_tag" id="edit-syllabus-{{ q.id }}" value="{{ q.syllabus_area_tag or '' }}" placeholder="e.g. APM, IRM"
+                     class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none">
+            </div>
+          </div>
+          <div id="edit-mcq-{{ q.id }}" class="space-y-3 {% if q.question_type != 'mcq' %}hidden{% endif %}">
+            <p class="text-sm font-medium text-gray-700">Answer Options</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {% set opt_a = q.answer_options[0] if q.answer_options|length > 0 else None %}
+              {% set opt_b = q.answer_options[1] if q.answer_options|length > 1 else None %}
+              {% set opt_c = q.answer_options[2] if q.answer_options|length > 2 else None %}
+              {% set opt_d = q.answer_options[3] if q.answer_options|length > 3 else None %}
+              <div>
+                <label for="edit-opt-a-{{ q.id }}" class="block text-xs text-gray-500 mb-1">Option A</label>
+                <input type="text" name="option_a" id="edit-opt-a-{{ q.id }}" value="{{ opt_a.option_text if opt_a else '' }}" placeholder="Option A text"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none">
+              </div>
+              <div>
+                <label for="edit-opt-b-{{ q.id }}" class="block text-xs text-gray-500 mb-1">Option B</label>
+                <input type="text" name="option_b" id="edit-opt-b-{{ q.id }}" value="{{ opt_b.option_text if opt_b else '' }}" placeholder="Option B text"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none">
+              </div>
+              <div>
+                <label for="edit-opt-c-{{ q.id }}" class="block text-xs text-gray-500 mb-1">Option C</label>
+                <input type="text" name="option_c" id="edit-opt-c-{{ q.id }}" value="{{ opt_c.option_text if opt_c else '' }}" placeholder="Option C text"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none">
+              </div>
+              <div>
+                <label for="edit-opt-d-{{ q.id }}" class="block text-xs text-gray-500 mb-1">Option D</label>
+                <input type="text" name="option_d" id="edit-opt-d-{{ q.id }}" value="{{ opt_d.option_text if opt_d else '' }}" placeholder="Option D text"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none">
+              </div>
+            </div>
+            <div>
+              <label for="edit-correct-answer-{{ q.id }}" class="block text-sm font-medium text-gray-700 mb-1">Correct Answer</label>
+              <select name="correct_answer" id="edit-correct-answer-{{ q.id }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none bg-white">
+                <option value="">Select correct answer</option>
+                <option value="A" {% if opt_a and opt_a.is_correct %}selected{% endif %}>A</option>
+                <option value="B" {% if opt_b and opt_b.is_correct %}selected{% endif %}>B</option>
+                <option value="C" {% if opt_c and opt_c.is_correct %}selected{% endif %}>C</option>
+                <option value="D" {% if opt_d and opt_d.is_correct %}selected{% endif %}>D</option>
+              </select>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="submit"
+                    class="px-4 py-2 bg-[#C9912B] hover:bg-[#b07d26] text-white text-sm font-medium rounded-lg transition">
+              <i class="fas fa-save mr-1"></i>Save
+            </button>
+            <button type="button" onclick="document.getElementById('edit-q-{{ q.id }}').classList.add('hidden')"
+                    class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-12 text-gray-400">
+      <i class="fas fa-question-circle text-4xl mb-3 block"></i>
+      <p class="text-sm">No questions yet. Add your first question above.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8">
+    <h2 class="text-lg font-bold text-[#1A2B4A] mb-6"><i class="fas fa-history mr-2"></i>Submissions</h2>
+    {% if submissions %}
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Student</th>
+            <th scope="col" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Score</th>
+            <th scope="col" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Passed</th>
+            <th scope="col" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for s in submissions %}
+          <tr class="hover:bg-gray-50 transition">
+            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">{{ s.user.full_name }}</td>
+            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 text-center">{{ s.score }}%</td>
+            <td class="px-4 py-3 whitespace-nowrap text-center">
+              {% if s.passed %}
+              <i class="fas fa-check-circle text-green-500"></i>
+              {% else %}
+              <i class="fas fa-times-circle text-red-400"></i>
+              {% endif %}
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap text-center">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                {% if s.status == 'released' %}bg-green-50 text-green-700
+                {% elif s.status == 'submitted' %}bg-yellow-50 text-yellow-700
+                {% elif s.status == 'failed' %}bg-red-50 text-red-700
+                {% else %}bg-gray-50 text-gray-600{% endif %}">
+                {{ s.status | capitalize }}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-12 text-gray-400">
+      <i class="fas fa-inbox text-4xl mb-3 block"></i>
+      <p class="text-sm">No submissions yet.</p>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

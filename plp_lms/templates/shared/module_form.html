@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{{ "Edit" if module else "New" }} Module — {{ course.title }}{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold mb-6" style="color: #1A2B4A;">
+    {{ "Edit" if module else "Create" }} Module
+    <span class="text-sm font-normal text-gray-500">for {{ course.title }}</span>
+  </h1>
+
+  <form method="POST" class="bg-white shadow rounded-lg p-6 space-y-5">
+    <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+    {{ form.hidden_tag() if form is defined }}
+
+    <input type="hidden" name="dummy_token" value="dummy">
+
+    <div>
+      <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+      <input type="text" name="title" id="title" required aria-required="true" maxlength="200"
+             value="{{ module.title if module else '' }}"
+             class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C9912B] focus:border-transparent">
+    </div>
+
+    <div>
+      <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+      <textarea name="description" id="description" rows="5"
+                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C9912B] focus:border-transparent">{{ module.description if module else '' }}</textarea>
+    </div>
+
+    <div>
+      <label for="delivery_mode" class="block text-sm font-medium text-gray-700 mb-1">Delivery Mode</label>
+      <select name="delivery_mode" id="delivery_mode" required aria-required="true"
+              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C9912B] focus:border-transparent">
+        <option value="online" {{ 'selected' if module and module.delivery_mode == 'online' else '' }}>Online</option>
+        <option value="classroom" {{ 'selected' if module and module.delivery_mode == 'classroom' else '' }}>Classroom</option>
+        <option value="practical" {{ 'selected' if module and module.delivery_mode == 'practical' else '' }}>Practical</option>
+      </select>
+    </div>
+
+    {% if module %}
+    <div class="flex items-center gap-2">
+      <input type="checkbox" name="is_published" id="is_published" value="1"
+             {{ 'checked' if module.is_published else '' }}
+             class="h-4 w-4 rounded border-gray-300 text-[#C9912B] focus:ring-[#C9912B]">
+      <label for="is_published" class="text-sm font-medium text-gray-700">Published</label>
+    </div>
+    {% endif %}
+
+    <div class="flex items-center gap-3 pt-2">
+      <button type="submit"
+              class="px-6 py-2 rounded-md text-white font-medium transition-colors"
+              style="background-color: #C9912B;"
+              onmouseover="this.style.backgroundColor='#b47d24'"
+              onmouseout="this.style.backgroundColor='#C9912B'">
+        {{ "Update" if module else "Create" }} Module
+      </button>
+      <a href="/courses/{{ course.id }}"
+         class="px-6 py-2 rounded-md border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors">
+        Cancel
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}

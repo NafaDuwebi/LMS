@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Assessment Results - Learner{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-6">
+    <h1 class="text-2xl font-bold mb-6" style="color: #1A2B4A;"><i class="fas fa-chart-bar mr-2" style="color: #C9912B;"></i> Assessment Results</h1>
+
+    {% if submissions %}
+    <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="bg-gray-50 text-gray-600 uppercase text-xs">
+                    <th scope="col" class="text-left px-4 py-3">Assessment</th>
+                    <th scope="col" class="text-center px-4 py-3">Attempt</th>
+                    <th scope="col" class="text-center px-4 py-3">Score</th>
+                    <th scope="col" class="text-center px-4 py-3">Result</th>
+                    <th scope="col" class="text-center px-4 py-3">Submitted</th>
+                    <th scope="col" class="text-center px-4 py-3">Feedback</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y">
+                {% for s in submissions %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium" style="color: #1A2B4A;">{{ s.assessment.title }}</td>
+                    <td class="px-4 py-3 text-center text-gray-600">Attempt {{ s.attempt_number }}</td>
+                    <td class="px-4 py-3 text-center font-semibold">{{ s.score }}%</td>
+                    <td class="px-4 py-3 text-center">
+                        {% if s.passed %}
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold rounded bg-green-100 text-green-700">
+                            <i class="fas fa-check-circle"></i> Pass
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold rounded bg-red-100 text-red-700">
+                            <i class="fas fa-times-circle"></i> Fail
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3 text-center text-gray-500 text-xs">
+                        {{ s.submitted_at.strftime('%d %b %Y, %H:%M') if s.submitted_at else '—' }}
+                    </td>
+                    <td class="px-4 py-3 text-center">
+                        {% if s.feedback %}
+                        <button onclick="alert('{{ s.feedback|e }}')"
+                                class="text-sm font-medium hover:underline" style="color: #C9912B;" aria-label="View feedback">
+                            <i class="fas fa-comment"></i>
+                        </button>
+                        {% else %}
+                        <span class="text-gray-400">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="bg-white rounded-lg shadow-sm border p-8 text-center">
+        <i class="fas fa-clipboard-list text-4xl mb-3" style="color: #C9912B;"></i>
+        <p class="text-gray-500">No assessment submissions yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

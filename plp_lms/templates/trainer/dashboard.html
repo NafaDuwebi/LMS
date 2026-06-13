@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Trainer Dashboard{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <h1 class="text-2xl font-bold text-[#1A2B4A]">Welcome, {{ user.full_name }}</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-[#C9912B]">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 uppercase tracking-wide">My Cohorts</p>
+                    <p class="text-3xl font-bold text-[#1A2B4A]">{{ my_cohorts }}</p>
+                </div>
+                <i class="fas fa-users text-3xl text-[#C9912B]"></i>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-[#C9912B]">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 uppercase tracking-wide">Pending Marking</p>
+                    <p class="text-3xl font-bold text-[#1A2B4A]">{{ pending_marking }}</p>
+                </div>
+                <i class="fas fa-tasks text-3xl text-[#C9912B]"></i>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-[#C9912B]">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 uppercase tracking-wide">Upcoming Sessions</p>
+                    <p class="text-3xl font-bold text-[#1A2B4A]">{{ upcoming_sessions }}</p>
+                </div>
+                <i class="fas fa-calendar-alt text-3xl text-[#C9912B]"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-lg shadow">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-[#1A2B4A]">Your Cohorts</h2>
+            </div>
+            <div class="divide-y divide-gray-200">
+                {% for cohort in cohorts %}
+                <div class="px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-medium text-[#1A2B4A]">{{ cohort.name }}</p>
+                            <p class="text-sm text-gray-500">{{ cohort.course.title }} &middot; {{ cohort.start_date }} &ndash; {{ cohort.end_date }}</p>
+                        </div>
+                        <a href="/cohorts/{{ cohort.id }}" class="text-[#C9912B] hover:underline text-sm font-medium">View</a>
+                    </div>
+                </div>
+                {% else %}
+                <div class="px-6 py-8 text-center text-gray-500">
+                    <i class="fas fa-inbox text-3xl mb-2"></i>
+                    <p>No cohorts assigned yet.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-[#1A2B4A]">Quick Actions</h2>
+            </div>
+            <div class="p-6 space-y-3">
+                <a href="{{ '/trainer/cohorts' }}" class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-[#C9912B] hover:text-white transition group">
+                    <i class="fas fa-layer-group w-8 text-[#C9912B] group-hover:text-white"></i>
+                    <span class="font-medium">View Cohorts</span>
+                </a>
+                <a href="{{ '/trainer/submissions' }}" class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-[#C9912B] hover:text-white transition group">
+                    <i class="fas fa-check-double w-8 text-[#C9912B] group-hover:text-white"></i>
+                    <span class="font-medium">Marking Queue</span>
+                </a>
+                <a href="{{ '/trainer/attendance' }}" class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-[#C9912B] hover:text-white transition group">
+                    <i class="fas fa-clipboard-list w-8 text-[#C9912B] group-hover:text-white"></i>
+                    <span class="font-medium">Attendance Register</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block title %}{{ 'Edit' if path else 'Create' }} Learning Path{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <h1 class="text-2xl font-bold mb-6">{{ 'Edit' if path else 'Create' }} Learning Path</h1>
+  <form method="POST" action="/learning-paths/create" class="bg-white rounded-lg shadow p-6 space-y-4">
+    <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+    <div>
+      <label for="title" class="block text-sm font-medium mb-1">Title</label>
+      <input type="text" id="title" name="title" required aria-required="true" class="w-full border rounded px-3 py-2" value="{{ path.title if path else '' }}">
+    </div>
+    <div>
+      <label for="description" class="block text-sm font-medium mb-1">Description</label>
+      <textarea id="description" name="description" rows="4" class="w-full border rounded px-3 py-2">{{ path.description if path else '' }}</textarea>
+    </div>
+    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Save</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}{{ "Edit Course" if course else "New Course" }}{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <h1 class="text-2xl font-bold mb-6" style="color: #1A2B4A;">{{ "Edit Course" if course else "New Course" }}</h1>
+  <form method="POST" class="bg-white rounded-lg shadow-md border border-gray-200 p-6 space-y-5">
+    <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <div>
+        <label for="course_code" class="block text-sm font-medium mb-1" style="color: #1A2B4A;">Course Code</label>
+         <input type="text" id="course_code" name="course_code" value="{{ course.course_code if course else '' }}" required aria-required="true" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 transition-colors" style="focus:border-#C9912B; focus:ring-#C9912B;">
+      </div>
+      <div>
+        <label for="title" class="block text-sm font-medium mb-1" style="color: #1A2B4A;">Title</label>
+         <input type="text" id="title" name="title" value="{{ course.title if course else '' }}" required aria-required="true" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 transition-colors" style="focus:border-#C9912B; focus:ring-#C9912B;">
+      </div>
+      <div>
+        <label for="awarding_body" class="block text-sm font-medium mb-1" style="color: #1A2B4A;">Awarding Body</label>
+        <input type="text" id="awarding_body" name="awarding_body" value="{{ course.awarding_body if course else '' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 transition-colors" style="focus:border-#C9912B; focus:ring-#C9912B;">
+      </div>
+      <div>
+        <label for="level" class="block text-sm font-medium mb-1" style="color: #1A2B4A;">Level</label>
+        <input type="text" id="level" name="level" value="{{ course.level if course else '' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 transition-colors" style="focus:border-#C9912B; focus:ring-#C9912B;">
+      </div>
+      <div>
+        <label for="pass_mark" class="block text-sm font-medium mb-1" style="color: #1A2B4A;">Pass Mark (%)</label>
+        <input type="number" id="pass_mark" name="pass_mark" value="{{ course.pass_mark if course else '' }}" min="0" max="100" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 transition-colors" style="focus:border-#C9912B; focus:ring-#C9912B;">
+      </div>
+      <div>
+        <label for="credit_value" class="block text-sm font-medium mb-1" style="color: #1A2B4A;">Credit Value</label>
+        <input type="number" id="credit_value" name="credit_value" value="{{ course.credit_value if course else '' }}" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 transition-colors" style="focus:border-#C9912B; focus:ring-#C9912B;">
+      </div>
+      <div>
+        <label for="delivery_mode" class="block text-sm font-medium mb-1" style="color: #1A2B4A;">Delivery Mode</label>
+        <select id="delivery_mode" name="delivery_mode" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 transition-colors" style="focus:border-#C9912B; focus:ring-#C9912B;">
+          <option value="online" {{ "selected" if course and course.delivery_mode == "online" else "" }}>Online</option>
+          <option value="classroom" {{ "selected" if course and course.delivery_mode == "classroom" else "" }}>Classroom</option>
+          <option value="blended" {{ "selected" if course and course.delivery_mode == "blended" else "" }}>Blended</option>
+          <option value="on-the-job" {{ "selected" if course and course.delivery_mode == "on-the-job" else "" }}>On-the-Job</option>
+        </select>
+      </div>
+      <div>
+        <label for="assessment_type" class="block text-sm font-medium mb-1" style="color: #1A2B4A;">Assessment Type</label>
+        <select id="assessment_type" name="assessment_type" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 transition-colors" style="focus:border-#C9912B; focus:ring-#C9912B;">
+          <option value="mcq" {{ "selected" if course and course.assessment_type == "mcq" else "" }}>MCQ</option>
+          <option value="written" {{ "selected" if course and course.assessment_type == "written" else "" }}>Written</option>
+          <option value="mixed" {{ "selected" if course and course.assessment_type == "mixed" else "" }}>Mixed</option>
+          <option value="practical" {{ "selected" if course and course.assessment_type == "practical" else "" }}>Practical</option>
+        </select>
+      </div>
+      <div>
+        <label for="duration_hours" class="block text-sm font-medium mb-1" style="color: #1A2B4A;">Duration (hours)</label>
+        <input type="number" id="duration_hours" name="duration_hours" value="{{ course.duration_hours if course else '' }}" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 transition-colors" style="focus:border-#C9912B; focus:ring-#C9912B;">
+      </div>
+      <div>
+        <label for="cert_validity_years" class="block text-sm font-medium mb-1" style="color: #1A2B4A;">Cert Validity (years)</label>
+        <input type="number" id="cert_validity_years" name="cert_validity_years" value="{{ course.cert_validity_years if course else '' }}" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 transition-colors" style="focus:border-#C9912B; focus:ring-#C9912B;">
+      </div>
+    </div>
+    <div>
+      <label for="description" class="block text-sm font-medium mb-1" style="color: #1A2B4A;">Description</label>
+      <textarea id="description" name="description" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 transition-colors" style="focus:border-#C9912B; focus:ring-#C9912B;">{{ course.description if course else '' }}</textarea>
+    </div>
+    {% if course %}
+    <div class="flex items-center">
+      <input type="checkbox" id="is_published" name="is_published" value="1" {{ "checked" if course.is_published else "" }} class="h-4 w-4 rounded border-gray-300 focus:ring-2" style="color: #C9912B; focus:ring-#C9912B;">
+      <label for="is_published" class="ml-2 text-sm font-medium" style="color: #1A2B4A;">Published</label>
+    </div>
+    {% endif %}
+    <div class="flex items-center justify-end space-x-3 pt-2">
+      <a href="{{ '/courses' }}" class="px-4 py-2 rounded-md text-gray-700 font-medium border border-gray-300 hover:bg-gray-50 transition-colors duration-150">Cancel</a>
+      <button type="submit" class="px-4 py-2 rounded-md text-white font-medium transition-colors duration-150" style="background-color: #C9912B;">
+        <i class="fas fa-save mr-2"></i>{{ "Save Changes" if course else "Create Course" }}
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}My Certificates - Learner{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-6">
+    <h1 class="text-2xl font-bold mb-6" style="color: #1A2B4A;"><i class="fas fa-award mr-2" style="color: #C9912B;"></i> My Certificates</h1>
+
+    {% if certificates %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for c in certificates %}
+        <div class="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition flex flex-col">
+            <div class="p-5 flex-1">
+                <div class="flex items-center justify-center mb-3">
+                    <i class="fas fa-certificate text-4xl" style="color: #C9912B;"></i>
+                </div>
+                <h3 class="font-bold text-base text-center" style="color: #1A2B4A;">{{ c.course.title }}</h3>
+                <p class="text-xs text-gray-500 text-center mt-1 font-mono">{{ c.certificate_number }}</p>
+
+                <div class="mt-4 space-y-2 text-sm text-gray-600">
+                    <div class="flex justify-between">
+                        <span>Issued:</span>
+                        <span class="font-medium" style="color: #1A2B4A;">{{ c.issued_at.strftime('%d %b %Y') }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Expires:</span>
+                        <span class="font-medium" style="color: #1A2B4A;">
+                            {{ c.expiry_date.strftime('%d %b %Y') if c.expiry_date else 'No expiry' }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-5 py-3 border-t bg-gray-50">
+                <a href="{{ '/certificates/c.id/download' }}"
+                   class="block text-center px-4 py-2 rounded font-semibold text-sm transition"
+                   style="background-color: #C9912B; color: #fff;">
+                    <i class="fas fa-download mr-1"></i> Download Certificate
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-white rounded-lg shadow-sm border p-8 text-center">
+        <i class="fas fa-award text-5xl mb-3" style="color: #C9912B;"></i>
+        <p class="text-gray-500">No certificates earned yet. Complete a course to earn your first certificate!</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block title %}Upload Documents{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <h1 class="text-2xl font-bold mb-2">Upload Documents</h1>
+  <p class="text-gray-500 mb-6">Cohort: {{ cohort.name }}</p>
+
+  {% if requirements %}
+  <div class="space-y-4">
+    {% for r in requirements %}
+    <div class="bg-white rounded-lg shadow p-4">
+      <div class="flex justify-between items-start mb-3">
+        <div>
+          <h3 class="font-medium">{{ r.document_label }}</h3>
+          {% if r.instructions %}
+          <p class="text-sm text-gray-500">{{ r.instructions }}</p>
+          {% endif %}
+        </div>
+        <span class="text-xs px-2 py-1 rounded {{ 'bg-red-100 text-red-600' if r.is_required else 'bg-gray-100 text-gray-600' }}">{{ 'Required' if r.is_required else 'Optional' }}</span>
+      </div>
+
+      {% set sub = submissions.get(r.id) %}
+      {% if sub %}
+      <div class="flex items-center gap-3 text-sm">
+        <span class="px-2 py-1 rounded text-xs {{ 'bg-green-100 text-green-700' if sub.status == 'approved' else 'bg-red-100 text-red-700' if sub.status == 'rejected' else 'bg-yellow-100 text-yellow-700' }}">
+          {{ sub.status }}
+        </span>
+        {% if sub.rejection_reason %}
+        <span class="text-red-500 text-xs">Reason: {{ sub.rejection_reason }}</span>
+        {% endif %}
+      </div>
+      {% else %}
+      <form method="POST" action="/documents/upload/{{ cohort.id }}" enctype="multipart/form-data" class="flex gap-3 items-center">
+    <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+        <input type="hidden" name="requirement_id" value="{{ r.id }}">
+        <label for="file_{{ r.id }}">Upload file</label>
+        <input type="file" id="file_{{ r.id }}" name="file" required aria-required="true" class="border rounded px-3 py-1 text-sm flex-1">
+        <button type="submit" class="bg-blue-600 text-white px-4 py-1 rounded text-sm hover:bg-blue-700">Upload</button>
+      </form>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-gray-500">No document requirements for this cohort.</p>
+  {% endif %}
+</div>
+{% endblock %}

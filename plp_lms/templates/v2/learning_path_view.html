@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+{% block title %}{{ path.title }}{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <div class="flex justify-between items-center mb-4">
+    <div>
+      <h1 class="text-2xl font-bold">{{ path.title }}</h1>
+      <p class="text-gray-500">{{ path.description or '' }}</p>
+    </div>
+    {% if user.role == 'learner' and not enrolment %}
+    <form method="POST" action="/learning-paths/{{ path.id }}/enrol">
+    <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+      <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Enrol</button>
+    </form>
+    {% elif enrolment %}
+    <span class="px-3 py-1 rounded text-sm {{ 'bg-green-100 text-green-700' if enrolment.status == 'completed' else 'bg-yellow-100 text-yellow-700' }}">{{ enrolment.status }}</span>
+    {% endif %}
+  </div>
+
+  <div class="bg-white rounded-lg shadow">
+    <div class="p-4 border-b font-semibold text-gray-700">Courses in this Path</div>
+    {% if path_courses %}
+    <ul class="divide-y">
+      {% for pc in path_courses %}
+      <li class="p-4 flex justify-between items-center">
+        <div>
+          <span class="text-gray-500 mr-2">#{{ pc.order_index }}</span>
+          {% if pc.is_unlocked or user.role in ('superadmin','trainer') %}
+          <a href="/courses/{{ pc.course.id }}" class="text-blue-600 hover:underline">{{ pc.course.title }}</a>
+          {% else %}
+          <span class="text-gray-400 cursor-not-allowed"><i class="fas fa-lock mr-1"></i>{{ pc.course.title }}</span>
+          {% endif %}
+        </div>
+        {% if user.role in ['superadmin','trainer'] %}
+        <form method="POST" action="/learning-paths/{{ path.id }}/delete-course/{{ pc.id }}" data-confirm="Are you sure you want to remove this course from the learning path? This cannot be undone.">
+          <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+          <button type="submit" class="btn btn-danger text-red-500 text-sm hover:underline">Remove</button>
+        </form>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="p-4 text-gray-500">No courses in this path yet.</p>
+    {% endif %}
+  </div>
+
+  {% if user.role in ['superadmin','trainer'] %}
+  <div class="mt-6 bg-white rounded-lg shadow p-4">
+    <h2 class="font-semibold mb-3">Add Course</h2>
+    <form method="POST" action="/learning-paths/{{ path.id }}/add-course" class="flex gap-3">
+      <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+      <label for="course_id">Course</label>
+      <select id="course_id" name="course_id" required aria-required="true" class="flex-1 border rounded px-3 py-2">
+        <option value="">Select course...</option>
+        {% for c in courses %}
+        <option value="{{ c.id }}">{{ c.title }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Add</button>
+    </form>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

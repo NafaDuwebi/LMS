@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+{% block title %}Review Skill Claims{% endblock %}
+{% block content %}
+<div class="max-w-6xl mx-auto">
+  <h1 class="text-2xl font-bold mb-4">Skill Claims Review</h1>
+  {% if claims %}
+  <div class="bg-white rounded-lg shadow overflow-hidden">
+    <table class="w-full">
+      <thead class="bg-gray-50 text-left text-sm">
+        <tr>
+          <th scope="col" class="p-3">Learner</th>
+          <th scope="col" class="p-3">Skill</th>
+          <th scope="col" class="p-3">Comment</th>
+          <th scope="col" class="p-3">Submitted</th>
+          <th scope="col" class="p-3">Action</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y text-sm">
+        {% for c in claims %}
+        <tr>
+          <td class="p-3">{{ c.claimant.full_name }}</td>
+          <td class="p-3 font-medium">{{ c.skill.title }}</td>
+          <td class="p-3 text-gray-500 max-w-xs truncate">{{ c.claim_comment }}</td>
+          <td class="p-3 text-gray-500">{{ c.submitted_at.strftime('%d %b %Y') }}</td>
+          <td class="p-3">
+            <form method="POST" action="/skills/review/{{ c.id }}" class="flex gap-2">
+    <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+              <input type="hidden" name="status" value="approved">
+              <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded text-xs hover:bg-green-600">Approve</button>
+            </form>
+            <form method="POST" action="/skills/review/{{ c.id }}" class="flex gap-2 mt-1">
+              <input type="hidden" name="status" value="rejected">
+              <label for="reviewer_comment_{{ c.id }}">Reason:</label>
+              <input type="text" id="reviewer_comment_{{ c.id }}" name="reviewer_comment" placeholder="Reason..." class="border rounded px-2 py-1 text-xs flex-1" required aria-required="true">
+              <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600">Reject</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-gray-500">No pending skill claims.</p>
+  {% endif %}
+</div>
+{% endblock %}

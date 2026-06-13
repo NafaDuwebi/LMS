@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block title %}Learning Paths{% endblock %}
+{% block content %}
+<div class="max-w-6xl mx-auto">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">Learning Paths</h1>
+    {% if user.role in ['superadmin','trainer'] %}
+    <a href="/learning-paths/create" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Create Path</a>
+    {% endif %}
+  </div>
+  {% if paths %}
+  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    {% for p in paths %}
+    <div class="bg-white rounded-lg shadow p-5 border">
+      <h2 class="text-lg font-semibold">{{ p.title }}</h2>
+      <p class="text-sm text-gray-500 mt-1">{{ p.description or '' }}</p>
+      <div class="mt-3 flex justify-between items-center">
+        <span class="text-xs text-gray-400">{{ p.created_at.strftime('%d %b %Y') }}</span>
+        <a href="/learning-paths/{{ p.id }}" class="text-blue-600 text-sm hover:underline">View</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-gray-500">No learning paths available.</p>
+  {% endif %}
+</div>
+{% endblock %}

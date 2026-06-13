@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block title %}My Skill Claims{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <h1 class="text-2xl font-bold mb-4">My Skill Claims</h1>
+  {% if claims %}
+  <div class="bg-white rounded-lg shadow overflow-hidden">
+    <table class="w-full">
+      <thead class="bg-gray-50 text-left text-sm">
+        <tr>
+          <th scope="col" class="p-3">Skill</th>
+          <th scope="col" class="p-3">Status</th>
+          <th scope="col" class="p-3">Submitted</th>
+          <th scope="col" class="p-3">Reviewer</th>
+          <th scope="col" class="p-3"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y text-sm">
+        {% for c in claims %}
+        <tr>
+          <td class="p-3 font-medium">{{ c.skill.title }}</td>
+          <td class="p-3">
+            <span class="px-2 py-1 rounded text-xs {{ 'bg-green-100 text-green-700' if c.status == 'approved' else 'bg-red-100 text-red-700' if c.status == 'rejected' else 'bg-yellow-100 text-yellow-700' }}">{{ c.status }}</span>
+          </td>
+          <td class="p-3 text-gray-500">{{ c.submitted_at.strftime('%d %b %Y') }}</td>
+          <td class="p-3 text-gray-500">{{ c.reviewer.full_name if c.reviewer else '-' }}</td>
+          <td class="p-3">
+            {% if c.reviewer_comment %}
+            <span title="{{ c.reviewer_comment }}" class="text-blue-500 cursor-pointer">&#9432;</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-gray-500">You haven't submitted any skill claims yet.</p>
+  {% endif %}
+  <a href="/learner/courses" class="inline-block mt-4 text-blue-600 hover:underline">Back to Courses</a>
+</div>
+{% endblock %}

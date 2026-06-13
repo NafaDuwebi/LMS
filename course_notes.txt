@@ -1,0 +1,7 @@
+Introduction to Project Management - Course Notes
+
+This document covers the key concepts of project management including:
+- Project lifecycle phases
+- Stakeholder management
+- Risk assessment
+- Agile vs Waterfall methodologies

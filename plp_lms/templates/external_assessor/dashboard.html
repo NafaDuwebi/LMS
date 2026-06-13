@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Assessor Dashboard{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-6">
+    <div class="flex items-center gap-3 mb-6">
+        <i class="fas fa-clipboard-check text-3xl" style="color: #C9912B;"></i>
+        <h1 class="text-2xl font-bold" style="color: #1A2B4A;">External Assessor Dashboard</h1>
+    </div>
+
+    <!-- Stats cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow border border-gray-200 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">Pending Skill Claims</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-1">{{ pending_claims }}</p>
+                </div>
+                <i class="fas fa-clipboard-list text-4xl text-accent opacity-50"></i>
+            </div>
+        </div>
+        <a href="/external-assessor/skills" class="bg-white rounded-lg shadow border border-gray-200 p-6 hover:shadow-lg transition block">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">Review Queue</p>
+                    <p class="text-sm text-accent mt-1">View all pending claims &rarr;</p>
+                </div>
+                <i class="fas fa-search text-4xl text-accent opacity-50"></i>
+            </div>
+        </a>
+        <a href="/external-assessor/assessments" class="bg-white rounded-lg shadow border border-gray-200 p-6 hover:shadow-lg transition block">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">Assessments</p>
+                    <p class="text-sm text-accent mt-1">View published assessments &rarr;</p>
+                </div>
+                <i class="fas fa-file-alt text-4xl text-accent opacity-50"></i>
+            </div>
+        </a>
+    </div>
+
+    <!-- Recent claims -->
+    {% if recent_claims %}
+    <div class="bg-white rounded-lg shadow border border-gray-200">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Recent Pending Claims</h2>
+        </div>
+        <div class="divide-y divide-gray-200">
+            {% for claim in recent_claims %}
+            <div class="px-6 py-4 flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-900">{{ claim.skill.title if claim.skill else 'Unknown Skill' }}</p>
+                    <p class="text-xs text-gray-500">by {{ claim.user.full_name if claim.user else 'Unknown' }} &middot; {{ claim.submitted_at.strftime('%d %b %Y, %H:%M') if claim.submitted_at else '' }}</p>
+                </div>
+                <a href="/skills/review" class="text-sm text-accent hover:underline">Review &rarr;</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="bg-white rounded-lg shadow border border-gray-200 p-12 text-center">
+        <i class="fas fa-check-circle text-5xl text-green-300 mb-4"></i>
+        <p class="text-gray-500">No pending skill claims.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

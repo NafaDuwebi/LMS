@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% block title %}{{ course.title }}{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex justify-between items-start mb-6">
+    <div>
+      <h1 class="text-2xl font-bold" style="color: #1A2B4A;">{{ course.title }}</h1>
+      <p class="text-sm text-gray-500 mt-1">{{ course.course_code }} &middot; {{ course.awarding_body }}</p>
+    </div>
+    <div class="flex items-center space-x-3">
+      {% if user.role in ['superadmin','trainer'] %}
+      <a href="/courses/{{ course.id }}/edit" class="inline-flex items-center px-4 py-2 rounded-md text-white font-medium transition-colors duration-150" style="background-color: #1A2B4A;">
+        <i class="fas fa-edit mr-2"></i>Edit Course
+      </a>
+      <a href="/courses/{{ course.id }}/modules/create" class="inline-flex items-center px-4 py-2 rounded-md text-white font-medium transition-colors duration-150" style="background-color: #C9912B;">
+        <i class="fas fa-plus mr-2"></i>Add Module
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <div class="lg:col-span-2">
+      <div class="bg-white rounded-lg shadow-md border border-gray-200 p-5">
+        <h2 class="text-lg font-semibold mb-3" style="color: #1A2B4A;">Description</h2>
+        <p class="text-gray-700 leading-relaxed">{{ course.description or "No description provided." }}</p>
+      </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-md border border-gray-200 p-5">
+      <h2 class="text-lg font-semibold mb-3" style="color: #1A2B4A;">Details</h2>
+      <dl class="space-y-3">
+        <div class="flex justify-between">
+          <dt class="text-sm text-gray-500">Level</dt>
+          <dd class="text-sm font-medium" style="color: #1A2B4A;">{{ course.level }}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-sm text-gray-500">Delivery Mode</dt>
+          <dd class="text-sm font-medium" style="color: #1A2B4A;">{{ course.delivery_mode }}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-sm text-gray-500">Duration</dt>
+          <dd class="text-sm font-medium" style="color: #1A2B4A;">{{ course.duration_hours }} hours</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-sm text-gray-500">Assessment</dt>
+          <dd class="text-sm font-medium" style="color: #1A2B4A;">{{ course.assessment_type }}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-sm text-gray-500">Pass Mark</dt>
+          <dd class="text-sm font-medium" style="color: #1A2B4A;">{{ course.pass_mark }}%</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-sm text-gray-500">Credit Value</dt>
+          <dd class="text-sm font-medium" style="color: #1A2B4A;">{{ course.credit_value }}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-sm text-gray-500">Cert Validity</dt>
+          <dd class="text-sm font-medium" style="color: #1A2B4A;">{{ course.cert_validity_years }} years</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-sm text-gray-500">Status</dt>
+          <dd class="text-sm font-medium">
+            {% if course.is_published %}
+            <span class="text-green-600">Published</span>
+            {% else %}
+            <span class="text-gray-400">Draft</span>
+            {% endif %}
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+
+  {% if outcomes %}
+  <div class="bg-white rounded-lg shadow-md border border-gray-200 p-5 mb-8">
+    <h2 class="text-lg font-semibold mb-4" style="color: #1A2B4A;">Learning Outcomes</h2>
+    <ul class="space-y-2">
+      {% for outcome in outcomes %}
+      <li class="flex items-start">
+        <i class="fas fa-check-circle mt-1 mr-3" style="color: #C9912B;"></i>
+        <span class="text-gray-700">{{ outcome.description }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <div class="mb-8">
+    <h2 class="text-xl font-semibold mb-4" style="color: #1A2B4A;">Modules</h2>
+    {% if course.modules %}
+    <div class="space-y-4">
+      {% for module in course.modules %}
+      <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+        <div class="p-5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center space-x-3">
+              <span class="text-sm font-medium px-2 py-0.5 rounded" style="color: #C9912B; background-color: rgba(201, 145, 43, 0.1);">Module {{ module.order_index }}</span>
+              <h3 class="text-lg font-semibold" style="color: #1A2B4A;">{{ module.title }}</h3>
+            </div>
+            {% if not module.is_published %}
+            <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Draft</span>
+            {% endif %}
+          </div>
+          <p class="text-sm text-gray-600 mb-3">{{ module.description }}</p>
+          <div class="flex items-center text-xs text-gray-500 mb-3">
+            <i class="fas fa-chalkboard-teacher mr-1"></i>
+            <span>{{ module.delivery_mode }}</span>
+          </div>
+          {% if module.materials %}
+          <div>
+            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Materials</p>
+            <ul class="space-y-1">
+              {% for material in module.materials %}
+              <li>
+                <a href="/courses/materials/{{ material.id }}/download" class="inline-flex items-center text-sm transition-colors duration-150" style="color: #1A2B4A;">
+                  <i class="fas fa-download mr-2" style="color: #C9912B;"></i>{{ material.filename }}
+                </a>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-12 bg-white rounded-lg border border-gray-200">
+      <i class="fas fa-folder-open text-4xl text-gray-300 mb-3"></i>
+      <p class="text-gray-500">No modules yet.</p>
+      {% if user.role in ['superadmin','trainer'] %}
+      <a href="/courses/{{ course.id }}/modules/create" class="inline-block mt-3 px-4 py-2 rounded-md text-white font-medium transition-colors duration-150" style="background-color: #C9912B;">
+        <i class="fas fa-plus mr-2"></i>Add the first module
+      </a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="mb-8">
+    <h2 class="text-xl font-semibold mb-4" style="color: #1A2B4A;">Assessments</h2>
+    <div class="bg-white rounded-lg shadow-md border border-gray-200 p-5">
+      {% if assessments %}
+      <div class="space-y-3">
+        {% for assessment in assessments %}
+        <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+          <div>
+            <a href="/assessments/{{ assessment.id }}" class="font-medium text-[#1A2B4A] hover:text-[#C9912B] transition">{{ assessment.title }}</a>
+            <span class="text-xs text-gray-500 ml-2">{{ assessment.type|replace('_', ' ')|title }}</span>
+            {% if not assessment.is_published %}
+            <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded ml-2">Draft</span>
+            {% endif %}
+          </div>
+          <div class="flex items-center space-x-3 text-sm">
+            <span class="text-gray-500">{{ assessment.questions|length }} questions</span>
+            {% if user.role in ('superadmin', 'trainer') %}
+            <a href="/assessments/{{ assessment.id }}" class="text-[#C9912B] hover:text-[#b07d26] transition">
+              <i class="fas fa-edit"></i> Manage
+            </a>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-gray-500 text-sm py-4 text-center">No assessments created for this course yet.</p>
+      {% endif %}
+      {% if user.role in ('superadmin', 'trainer') %}
+      <div class="mt-4 pt-4 border-t border-gray-100">
+        <a href="/assessments/create?course_id={{ course.id }}" class="inline-flex items-center px-4 py-2 rounded-md text-white font-medium transition-colors duration-150 text-sm" style="background-color: #C9912B;">
+          <i class="fas fa-plus mr-2"></i>Create Assessment
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="text-center">
+    <a href="/courses" class="inline-flex items-center text-sm font-medium transition-colors duration-150" style="color: #C9912B;">
+      <i class="fas fa-arrow-left mr-2"></i>Back to Courses
+    </a>
+  </div>
+</div>
+{% endblock %}

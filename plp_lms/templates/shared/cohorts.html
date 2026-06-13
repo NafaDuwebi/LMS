@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Cohorts{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+  <div class="flex items-center justify-between mb-8">
+    <h1 class="text-3xl font-bold" style="color: #1A2B4A;">Cohorts</h1>
+    <a href="/cohorts/create"
+       class="px-5 py-2.5 rounded-md text-white font-medium transition-colors"
+       style="background-color: #C9912B;"
+       onmouseover="this.style.backgroundColor='#b47d24'"
+       onmouseout="this.style.backgroundColor='#C9912B'">
+      + New Cohort
+    </a>
+  </div>
+
+  {% if cohorts %}
+  <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+    {% for cohort in cohorts %}
+    <div class="bg-white shadow rounded-lg overflow-hidden border border-gray-100 hover:shadow-md transition-shadow">
+      <div class="p-5">
+        <div class="flex items-start justify-between mb-2">
+          <h2 class="text-lg font-semibold" style="color: #1A2B4A;">{{ cohort.name }}</h2>
+          {% if cohort.is_active %}
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>
+          {% else %}
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Inactive</span>
+          {% endif %}
+        </div>
+
+        <p class="text-sm text-gray-500 mb-1">{{ cohort.course.title }}</p>
+        <p class="text-sm text-gray-500 mb-3">
+          <i class="fas fa-chalkboard-teacher mr-1"></i>{{ cohort.trainer.full_name if cohort.trainer else 'Unassigned' }}
+        </p>
+
+        <div class="flex items-center gap-4 text-xs text-gray-500 mb-3">
+          <span><i class="far fa-calendar-alt mr-1"></i>{{ cohort.start_date }} – {{ cohort.end_date }}</span>
+          <span class="capitalize"><i class="fas fa-sync-alt mr-1"></i>{{ cohort.delivery_mode }}</span>
+        </div>
+
+        <div class="mb-3">
+          {% set count = cohort.enrolments|length if cohort.enrolments is defined else 0 %}
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-600">{{ count }}/{{ cohort.max_learners or '∞' }} enrolled</span>
+            {% if cohort.max_learners %}
+            <span class="text-gray-400">{{ ((count / cohort.max_learners) * 100)|int }}%</span>
+            {% endif %}
+          </div>
+          {% if cohort.max_learners %}
+          <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+            <div class="h-2 rounded-full transition-all" style="background-color: #C9912B; width: {{ ((count / cohort.max_learners) * 100)|int }}%;"></div>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="flex items-center gap-2 pt-2 border-t border-gray-100">
+          <a href="/cohorts/{{ cohort.id }}"
+             class="text-sm font-medium transition-colors"
+             style="color: #C9912B;"
+             onmouseover="this.style.color='#b47d24'"
+             onmouseout="this.style.color='#C9912B'">
+            <i class="fas fa-eye mr-1"></i>View
+          </a>
+          <a href="/cohorts/{{ cohort.id }}/edit"
+             class="text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors ml-auto">
+            <i class="fas fa-edit mr-1"></i>Edit
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-16">
+    <i class="fas fa-users text-5xl text-gray-300 mb-4"></i>
+    <p class="text-gray-500 text-lg">No cohorts yet.</p>
+    <a href="/cohorts/create"
+       class="inline-block mt-4 px-5 py-2.5 rounded-md text-white font-medium transition-colors"
+       style="background-color: #C9912B;"
+       onmouseover="this.style.backgroundColor='#b47d24'"
+       onmouseout="this.style.backgroundColor='#C9912B'">
+      Create your first cohort
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
