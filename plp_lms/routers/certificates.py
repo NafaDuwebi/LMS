@@ -10,6 +10,7 @@ from models.certificate import Certificate
 from services.auth_service import get_current_user, require_role
 from services.certificate_service import generate_certificate_pdf, revoke_certificate
 from services.notification_service import send_certificate_notification
+from services.audit_service import log_action
 from services.flash import flash
 import os
 
@@ -58,6 +59,7 @@ def issue_certificate(
     course = enrolment.cohort.course
     cert = generate_certificate_pdf(db, learner, course, enrolment)
     send_certificate_notification(db, learner.id, course.title, cert.certificate_number)
+    log_action(db, user.id, "issue_certificate", "certificate", cert.id, f"Issued certificate {cert.certificate_number} to {learner.email} for {course.title}")
     cohort_id = enrolment.cohort_id
     flash(request, f"Certificate issued for {learner.full_name}", "success")
     return RedirectResponse(url=f"/cohorts/{cohort_id}", status_code=302)
@@ -72,6 +74,8 @@ def revoke(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
+    cert = db.query(Certificate).filter(Certificate.id == cert_id).first()
+    log_action(db, user.id, "revoke_certificate", "certificate", cert_id, f"Revoked certificate {cert.certificate_number if cert else ''}: {reason}")
     revoke_certificate(db, cert_id, reason)
     flash(request, "Certificate revoked", "success")
     return RedirectResponse(url="/certificates", status_code=302)
@@ -82,7 +86,7 @@ def download_certificate(cert_id: int, db: Session = Depends(get_db), user: User
     cert = db.query(Certificate).filter(Certificate.id == cert_id).first()
     if not cert or not cert.pdf_path or not os.path.exists(cert.pdf_path):
         raise HTTPException(status_code=404)
-    return FileResponse(cert.pdf_path, filename=f"certificate_{cert.certificate_number}.pdf")
+    return FileResponse(cert.pdf_path, filename=f"certificate_{cert.certificate_number}.pdf", headers={"Content-Disposition": f"attachment; filename=\"certificate_{cert.certificate_number}.pdf\""})
 
 
 @router.get("/verify/{cert_number}", name="certificates.verify")

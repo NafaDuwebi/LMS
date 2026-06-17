@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Complete Your Account{% endblock %}
+{% block content %}
+<div class="min-h-screen flex items-center justify-center px-4 py-12">
+  <div class="max-w-md w-full bg-white rounded-xl shadow-lg border border-gray-100 p-8">
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#FFC000] mb-4">
+        <i class="fas fa-user-check text-2xl text-white"></i>
+      </div>
+      <h1 class="text-2xl font-bold text-[#540032]">Complete Your Account</h1>
+      <p class="text-sm text-gray-500 mt-1">Set your password and accept the terms to get started.</p>
+    </div>
+
+    {% if error %}
+    <div class="mb-4 px-4 py-3 rounded text-sm font-medium bg-red-100 text-red-700 border border-red-200">
+      <i class="fas fa-exclamation-circle mr-2"></i>{{ error }}
+    </div>
+    {% endif %}
+
+    <form method="POST" action="/auth/first-login" class="space-y-6">
+      <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+
+      {% if user.force_password_change %}
+      <div class="bg-gray-50 rounded-lg p-5 border border-gray-200">
+        <h2 class="text-sm font-semibold text-[#540032] mb-4 flex items-center gap-2">
+          <i class="fas fa-lock text-[#FFC000]"></i> Set Your Password
+        </h2>
+        <div class="space-y-4">
+          <div>
+            <label for="new_password" class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+            <input type="password" name="new_password" id="new_password" required aria-required="true"
+                   placeholder="At least 8 characters"
+                   class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-[#FFC000] outline-none transition text-sm">
+            <p class="text-xs text-gray-400 mt-1">Minimum 8 characters, including uppercase, lowercase, and a number or symbol.</p>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if user.requires_gdpr_consent %}
+      <div class="bg-gray-50 rounded-lg p-5 border border-gray-200">
+        <h2 class="text-sm font-semibold text-[#540032] mb-4 flex items-center gap-2">
+          <i class="fas fa-shield-alt text-[#FFC000]"></i> GDPR Consent
+        </h2>
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" name="gdpr_consent" value="true"
+                 class="mt-1 h-4 w-4 rounded border-gray-300 text-[#FFC000] focus:ring-[#FFC000]">
+          <span class="text-sm text-gray-600">
+            I consent to the processing of my personal data for the purposes of training administration,
+            assessment recording, and certificate issuance in accordance with the General Data Protection Regulation (GDPR).
+          </span>
+        </label>
+      </div>
+      {% endif %}
+
+      <button type="submit"
+              class="w-full px-6 py-3 bg-[#FFC000] hover:bg-[#b07d26] text-white text-sm font-semibold rounded-lg transition">
+        <i class="fas fa-arrow-right mr-2"></i>Complete Setup
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

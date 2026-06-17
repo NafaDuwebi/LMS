@@ -4,6 +4,7 @@ from models.cohort import Enrolment
 from models.submission import Submission
 from models.assessment import Assessment
 from models.cohort import AttendanceRecord
+from models.material_view import MaterialView
 
 
 def get_learner_progress(db: Session, user_id: int, course_id: int):
@@ -31,7 +32,14 @@ def get_learner_progress(db: Session, user_id: int, course_id: int):
 
         is_completed = False
         if not mod.assessments and mod.materials:
-            is_completed = True
+            all_viewed = all(
+                db.query(MaterialView).filter(
+                    MaterialView.user_id == user_id,
+                    MaterialView.material_id == mat.id,
+                ).count() > 0
+                for mat in mod.materials
+            )
+            is_completed = all_viewed
         elif mod.assessments and submissions >= len(mod.assessments):
             is_completed = True
 

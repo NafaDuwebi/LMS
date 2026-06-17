@@ -2,7 +2,7 @@
 {% block title %}Upload Material — {{ module.title }}{% endblock %}
 {% block content %}
 <div class="max-w-2xl mx-auto px-4 py-8">
-  <h1 class="text-2xl font-bold mb-6" style="color: #1A2B4A;">
+  <h1 class="text-2xl font-bold mb-6" style="color: #540032;">
     Upload Material
     <span class="text-sm font-normal text-gray-500">for {{ module.title }}</span>
   </h1>
@@ -15,14 +15,14 @@
     <div>
       <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
       <input type="text" name="title" id="title" required aria-required="true" maxlength="200"
-             class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C9912B] focus:border-transparent">
+             class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#FFC000] focus:border-transparent">
     </div>
 
     <div>
       <label for="file_type" class="block text-sm font-medium text-gray-700 mb-1">File Type</label>
       <select name="file_type" id="file_type" required aria-required="true"
               onchange="toggleUrlField(this.value)"
-              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C9912B] focus:border-transparent">
+              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#FFC000] focus:border-transparent">
         <option value="">— Select type —</option>
         <option value="pdf">PDF</option>
         <option value="pptx">PowerPoint (PPTX)</option>
@@ -35,24 +35,24 @@
     <div id="file_upload_wrapper">
       <label for="file" class="block text-sm font-medium text-gray-700 mb-1">File</label>
       <input type="file" name="file" id="file"
-             class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:text-white file:bg-[#C9912B] hover:file:bg-[#b47d24]">
+             class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:text-white file:bg-[#FFC000] hover:file:bg-[#D4A000]">
     </div>
 
     <div id="url_wrapper" class="hidden">
       <label for="url" class="block text-sm font-medium text-gray-700 mb-1">URL</label>
       <input type="url" name="url" id="url" placeholder="https://example.com/resource"
-             class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C9912B] focus:border-transparent">
+             class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#FFC000] focus:border-transparent">
     </div>
 
     <div class="flex items-center gap-3 pt-2">
       <button type="submit"
               class="px-6 py-2 rounded-md text-white font-medium transition-colors"
-              style="background-color: #C9912B;"
-              onmouseover="this.style.backgroundColor='#b47d24'"
-              onmouseout="this.style.backgroundColor='#C9912B'">
+              style="background-color: #FFC000;"
+              onmouseover="this.style.backgroundColor='#D4A000'"
+              onmouseout="this.style.backgroundColor='#FFC000'">
         Upload Material
       </button>
-      <a href="/courses/modules/{{ module.id }}"
+      <a href="/courses/{{ module.course_id }}"
          class="px-6 py-2 rounded-md border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors">
         Cancel
       </a>

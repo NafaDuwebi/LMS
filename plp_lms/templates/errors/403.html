@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}403 - Access Denied{% endblock %}
+{% block content %}
+<div class="min-h-[60vh] flex items-center justify-center px-4">
+  <div class="text-center max-w-md">
+    <div class="text-7xl font-bold" style="color: #FFC000;">403</div>
+    <h1 class="text-2xl font-semibold mt-4" style="color: #540032;">Access Denied</h1>
+    <p class="text-gray-600 mt-2">{{ message or "You do not have permission to access this page." }}</p>
+    <a href="/dashboard" class="inline-flex items-center mt-6 px-5 py-2 rounded font-semibold text-sm transition" style="background-color: #540032; color: #fff;">
+      <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+    </a>
+  </div>
+</div>
+{% endblock %}

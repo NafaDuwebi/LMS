@@ -31,6 +31,16 @@ def my_learners(request: Request, user: User = Depends(get_current_user), db: Se
     return templates.TemplateResponse("trainer/learners.html", {"request": request, "user": user, "cohorts": cohorts, "enrolments": enrolments})
 
 
+@router.get("/attendance", response_class=HTMLResponse, name="trainer.attendance")
+def attendance_cohorts(request: Request, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    q = db.query(Cohort).options(joinedload(Cohort.course), joinedload(Cohort.trainer))
+    if user.role == "superadmin":
+        cohorts = q.all()
+    else:
+        cohorts = q.filter(Cohort.trainer_id == user.id).all()
+    return templates.TemplateResponse("trainer/attendance_cohorts.html", {"request": request, "user": user, "cohorts": cohorts})
+
+
 @router.get("/submissions", response_class=HTMLResponse, name="trainer.submissions")
 def pending_submissions(request: Request, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     from models.assessment import Assessment

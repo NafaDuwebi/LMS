@@ -12,9 +12,9 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#1A2B4A',
-                        accent: '#C9912B',
-                        'primary-light': '#2A3F6A',
+                        primary: '#540032',
+                        accent: '#FFC000',
+                        'primary-light': '#6B0040',
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
@@ -27,10 +27,22 @@
         body { font-family: 'Inter', sans-serif; }
         .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s infinite; }
         @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-        .skip-link { position: absolute; left: -9999px; z-index: 9999; background: #1A2B4A; color: #fff; padding: 0.5rem 1rem; text-decoration: none; }
+        .skip-link { position: absolute; left: -9999px; z-index: 9999; background: #540032; color: #fff; padding: 0.5rem 1rem; text-decoration: none; }
         .skip-link:focus { left: 0; top: 0; }
         .toast { position: fixed; top: 1rem; right: 1rem; z-index: 9999; }
         .module-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.2s; }
+        /* PLP brand: gold-button contrast */
+        /* Gold (#FFC000) needs dark text for WCAG AA contrast */
+        [style*='background-color: #FFC000'],
+        [style*='background-color:#FFC000'] {
+            color: #35313B !important;
+        }
+        /* Hover: slightly darker gold */
+        [style*='background-color: #FFC000']:hover,
+        [style*='background-color:#FFC000']:hover {
+            background-color: #D4A000 !important;
+            color: #35313B !important;
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -38,14 +50,16 @@
     {% if user %}
     <nav class="bg-primary text-white shadow-lg">
         <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center space-x-8">
-                    <a href="/dashboard" class="flex items-center space-x-2 shrink-0">
-                        <i class="fas fa-graduation-cap text-accent text-lg"></i>
-                        <span class="text-lg font-bold tracking-tight whitespace-nowrap">PLP LMS</span>
-                    </a>
+            <div class="flex items-center min-h-16 py-2">
+                <a href="/dashboard" class="flex items-center shrink-0 mr-6">
+                    <img src="/static/img/plp_logo.svg"
+                         alt="PL Projects"
+                         class="h-10 w-auto object-contain"
+                         title="PL Projects Learning Management System">
+                </a>
+                <div class="flex-1 flex items-center overflow-x-auto">
                     {% if user.role in ['superadmin', 'trainer'] %}
-                    <div class="hidden md:flex space-x-4">
+                    <div class="hidden md:flex gap-x-4 whitespace-nowrap">
                         <a href="/dashboard" class="px-3 py-2 text-sm hover:text-accent transition">Dashboard</a>
                         <a href="/courses" class="px-3 py-2 text-sm hover:text-accent transition">Courses</a>
                         <a href="/cohorts" class="px-3 py-2 text-sm hover:text-accent transition">Cohorts</a>
@@ -56,30 +70,34 @@
                         {% if user.role == 'superadmin' %}
                         <a href="/admin/users" class="px-3 py-2 text-sm hover:text-accent transition">Users</a>
                         <a href="/admin/settings" class="px-3 py-2 text-sm hover:text-accent transition">Settings</a>
+                        <a href="/admin/departments" class="px-3 py-2 text-sm hover:text-accent transition">Departments</a>
+                        <a href="/admin/compliance" class="px-3 py-2 text-sm hover:text-accent transition">Compliance</a>
+                        <a href="/admin/enrolment-requests" class="px-3 py-2 text-sm hover:text-accent transition">Enrolment Requests</a>
                         <a href="/admin/retention" class="px-3 py-2 text-sm hover:text-accent transition">Retention</a>
                         <a href="/reports/subscriptions" class="px-3 py-2 text-sm hover:text-accent transition">Subscriptions</a>
                         {% endif %}
                     </div>
                     {% elif user.role == 'learner' %}
-                    <div class="hidden md:flex space-x-4">
+                    <div class="hidden md:flex gap-x-4 whitespace-nowrap">
                         <a href="/dashboard" class="px-3 py-2 text-sm hover:text-accent transition">Dashboard</a>
                         <a href="/learner/courses" class="px-3 py-2 text-sm hover:text-accent transition">My Courses</a>
+                        <a href="/courses/catalogue" class="px-3 py-2 text-sm hover:text-accent transition">Catalogue</a>
                         <a href="/learning-paths" class="px-3 py-2 text-sm hover:text-accent transition">Paths</a>
                         <a href="/skills/my" class="px-3 py-2 text-sm hover:text-accent transition">Skills</a>
                         <a href="/learner/training-record" class="px-3 py-2 text-sm hover:text-accent transition">Training Record</a>
                         <a href="/learner/results" class="px-3 py-2 text-sm hover:text-accent transition">Results</a>
-                        <a href="/learner/certificates" class="px-3 py-2 text-sm hover:text-accent transition">Certificates</a>
+                        <a href="/certificates" class="px-3 py-2 text-sm hover:text-accent transition">Certificates</a>
                         <a href="/messages" class="px-3 py-2 text-sm hover:text-accent transition">Messages</a>
                     </div>
                     {% elif user.role == 'observer' %}
-                    <div class="hidden md:flex space-x-4">
+                    <div class="hidden md:flex gap-x-4 whitespace-nowrap">
                         <a href="/dashboard" class="px-3 py-2 text-sm hover:text-accent transition">Dashboard</a>
                         <a href="/observer/cohorts" class="px-3 py-2 text-sm hover:text-accent transition">Cohorts</a>
                         <a href="/observer/courses" class="px-3 py-2 text-sm hover:text-accent transition">Courses</a>
                         <a href="/reports" class="px-3 py-2 text-sm hover:text-accent transition">Reports</a>
                     </div>
                     {% elif user.role == 'external_assessor' %}
-                    <div class="hidden md:flex space-x-4">
+                    <div class="hidden md:flex gap-x-4 whitespace-nowrap">
                         <a href="/dashboard" class="px-3 py-2 text-sm hover:text-accent transition">Dashboard</a>
                         <a href="/external-assessor/skills" class="px-3 py-2 text-sm hover:text-accent transition">Skills Review</a>
                         <a href="/external-assessor/assessments" class="px-3 py-2 text-sm hover:text-accent transition">Assessments</a>
@@ -88,6 +106,9 @@
                     {% endif %}
                 </div>
                 <div class="flex items-center space-x-4">
+                    <button id="mobile-menu-btn" class="md:hidden text-white hover:text-accent transition focus:outline-none" aria-label="Toggle navigation menu">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
                     <a href="/notifications" class="relative hover:text-accent transition">
                         <i class="fas fa-bell text-lg"></i>
                         {% if unread_count and unread_count > 0 %}
@@ -111,6 +132,48 @@
             </div>
         </div>
     </nav>
+    <div id="mobile-menu" class="hidden md:hidden bg-primary-light text-white">
+        <div class="px-4 py-3 space-y-1">
+            {% if user.role in ['superadmin', 'trainer'] %}
+            <a href="/dashboard" class="block px-3 py-2 text-sm hover:text-accent transition">Dashboard</a>
+            <a href="/courses" class="block px-3 py-2 text-sm hover:text-accent transition">Courses</a>
+            <a href="/cohorts" class="block px-3 py-2 text-sm hover:text-accent transition">Cohorts</a>
+            <a href="/assessments" class="block px-3 py-2 text-sm hover:text-accent transition">Assessments</a>
+            <a href="/learning-paths" class="block px-3 py-2 text-sm hover:text-accent transition">Paths</a>
+            <a href="/reports" class="block px-3 py-2 text-sm hover:text-accent transition">Reports</a>
+            <a href="/messages" class="block px-3 py-2 text-sm hover:text-accent transition">Messages</a>
+            {% if user.role == 'superadmin' %}
+            <a href="/admin/users" class="block px-3 py-2 text-sm hover:text-accent transition">Users</a>
+            <a href="/admin/settings" class="block px-3 py-2 text-sm hover:text-accent transition">Settings</a>
+            <a href="/admin/departments" class="block px-3 py-2 text-sm hover:text-accent transition">Departments</a>
+            <a href="/admin/enrolment-requests" class="block px-3 py-2 text-sm hover:text-accent transition">Enrolment Requests</a>
+            <a href="/admin/compliance" class="block px-3 py-2 text-sm hover:text-accent transition">Compliance</a>
+            <a href="/admin/retention" class="block px-3 py-2 text-sm hover:text-accent transition">Retention</a>
+            <a href="/reports/subscriptions" class="block px-3 py-2 text-sm hover:text-accent transition">Subscriptions</a>
+            {% endif %}
+            {% elif user.role == 'learner' %}
+            <a href="/dashboard" class="block px-3 py-2 text-sm hover:text-accent transition">Dashboard</a>
+            <a href="/learner/courses" class="block px-3 py-2 text-sm hover:text-accent transition">My Courses</a>
+            <a href="/courses/catalogue" class="block px-3 py-2 text-sm hover:text-accent transition">Catalogue</a>
+            <a href="/learning-paths" class="block px-3 py-2 text-sm hover:text-accent transition">Paths</a>
+            <a href="/skills/my" class="block px-3 py-2 text-sm hover:text-accent transition">Skills</a>
+            <a href="/learner/training-record" class="block px-3 py-2 text-sm hover:text-accent transition">Training Record</a>
+            <a href="/learner/results" class="block px-3 py-2 text-sm hover:text-accent transition">Results</a>
+            <a href="/certificates" class="block px-3 py-2 text-sm hover:text-accent transition">Certificates</a>
+            <a href="/messages" class="block px-3 py-2 text-sm hover:text-accent transition">Messages</a>
+            {% elif user.role == 'observer' %}
+            <a href="/dashboard" class="block px-3 py-2 text-sm hover:text-accent transition">Dashboard</a>
+            <a href="/observer/cohorts" class="block px-3 py-2 text-sm hover:text-accent transition">Cohorts</a>
+            <a href="/observer/courses" class="block px-3 py-2 text-sm hover:text-accent transition">Courses</a>
+            <a href="/reports" class="block px-3 py-2 text-sm hover:text-accent transition">Reports</a>
+            {% elif user.role == 'external_assessor' %}
+            <a href="/dashboard" class="block px-3 py-2 text-sm hover:text-accent transition">Dashboard</a>
+            <a href="/external-assessor/skills" class="block px-3 py-2 text-sm hover:text-accent transition">Skills Review</a>
+            <a href="/external-assessor/assessments" class="block px-3 py-2 text-sm hover:text-accent transition">Assessments</a>
+            <a href="/reports" class="block px-3 py-2 text-sm hover:text-accent transition">Reports</a>
+            {% endif %}
+        </div>
+    </div>
     {% endif %}
 
     {% if success %}
@@ -141,7 +204,7 @@
     </main>
 
     <footer class="bg-primary text-white text-center py-4 mt-8">
-        <p class="text-sm text-gray-300">&copy; 2026 PL Projects Ltd. All rights reserved.</p>
+        <p class="text-sm text-gray-300">&copy; 2026 PL Projects Ltd. All rights reserved. &nbsp;|&nbsp; <a href="https://plprojects.co.uk" target="_blank" rel="noopener noreferrer" class="underline hover:text-white transition">plprojects.co.uk</a></p>
         <p class="text-xs text-gray-400 mt-1">B Corp Certified Project Management Consultancy</p>
     </footer>
 
@@ -152,6 +215,13 @@
             form.addEventListener("submit", function(e) {
                 if (!confirm(form.dataset.confirm)) e.preventDefault();
             });
+        });
+        document.getElementById('mobile-menu-btn')?.addEventListener('click', function() {
+            var menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+            var icon = this.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
         });
     </script>
     {% block scripts %}{% endblock %}

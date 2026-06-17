@@ -3,12 +3,12 @@
 {% block content %}
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 class="text-2xl font-bold text-[#1A2B4A]">My Learners</h1>
+        <h1 class="text-2xl font-bold text-[#540032]">My Learners</h1>
         <div class="flex gap-2">
             <label for="searchInput" class="sr-only">Search learners</label>
-            <input type="text" id="searchInput" placeholder="Search learners..." class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-[#C9912B] focus:border-[#C9912B] w-64">
+            <input type="text" id="searchInput" placeholder="Search learners..." class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-[#FFC000] focus:border-[#FFC000] w-64">
             <label for="statusFilter" class="sr-only">Filter by status</label>
-            <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-[#C9912B] focus:border-[#C9912B]">
+            <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-[#FFC000] focus:border-[#FFC000]">
                 <option value="">All Statuses</option>
                 <option value="Active">Active</option>
                 <option value="Completed">Completed</option>
@@ -22,7 +22,7 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="bg-[#1A2B4A] text-white text-left">
+                    <tr class="bg-[#540032] text-white text-left">
                         <th scope="col" class="px-6 py-3 font-medium">Name</th>
                         <th scope="col" class="px-6 py-3 font-medium">Email</th>
                         <th scope="col" class="px-6 py-3 font-medium">Cohort</th>
@@ -34,7 +34,7 @@
                 <tbody class="divide-y divide-gray-200" id="learnersTable">
                     {% for enrolment in enrolments %}
                     <tr class="hover:bg-gray-50 transition learner-row" data-name="{{ enrolment.user.full_name|lower }}" data-email="{{ enrolment.user.email|lower }}" data-status="{{ enrolment.status }}">
-                        <td class="px-6 py-4 text-[#1A2B4A] font-medium">{{ enrolment.user.full_name }}</td>
+                        <td class="px-6 py-4 text-[#540032] font-medium">{{ enrolment.user.full_name }}</td>
                         <td class="px-6 py-4 text-gray-600">{{ enrolment.user.email }}</td>
                         <td class="px-6 py-4 text-gray-600">{{ enrolment.cohort.name }}</td>
                         <td class="px-6 py-4">
@@ -51,7 +51,7 @@
                         </td>
                         <td class="px-6 py-4">{{ enrolment.final_score|default('&mdash;'|safe) }}</td>
                         <td class="px-6 py-4">
-                            <a href="/trainer/learners/{{ enrolment.id }}" class="text-[#C9912B] hover:underline font-medium text-sm">
+                            <a href="/trainer/learners/{{ enrolment.id }}" class="text-[#FFC000] hover:underline font-medium text-sm">
                                 <i class="fas fa-eye mr-1"></i>View
                             </a>
                         </td>

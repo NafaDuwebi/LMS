@@ -58,3 +58,43 @@ def deliver_reports_task():
         db.commit()
     finally:
         db.close()
+
+
+def check_mandatory_training_reminders():
+    from database import SessionLocal
+    from models.user import User
+    from models.training_plan import TrainingPlanAssignment, TrainingPlan, TrainingPlanItem
+    from models.submission import Submission
+    from services.email_service import send_email
+    from datetime import date, timedelta
+
+    db = SessionLocal()
+    try:
+        today = date.today()
+        due_soon = today + timedelta(days=7)
+        assignments = db.query(TrainingPlanAssignment).join(TrainingPlan).filter(
+            TrainingPlan.is_active == True,
+            TrainingPlanAssignment.due_date <= due_soon,
+            TrainingPlanAssignment.due_date >= today,
+        ).all()
+        for a in assignments:
+            user = db.query(User).filter(User.id == a.user_id).first()
+            if not user or not user.email:
+                continue
+            items = db.query(TrainingPlanItem).filter(TrainingPlanItem.plan_id == a.plan_id).all()
+            incomplete = 0
+            for item in items:
+                sub = db.query(Submission).filter(
+                    Submission.user_id == user.id,
+                    Submission.passed == True,
+                    Submission.status == "released",
+                ).first()
+                if not sub:
+                    incomplete += 1
+            if incomplete > 0:
+                plan = db.query(TrainingPlan).filter(TrainingPlan.id == a.plan_id).first()
+                subject = f"Reminder: Mandatory training due in {incomplete} course(s)"
+                body = f"<p>Hi {user.full_name},</p><p>You have {incomplete} mandatory training course(s) due by {a.due_date} as part of plan '{plan.title}'.</p><p>Please log in to complete them.</p>"
+                send_email(user.email, subject, body)
+    finally:
+        db.close()

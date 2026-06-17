@@ -94,6 +94,13 @@ def generate_certificate_pdf(db, user, course, enrolment):
     return cert
 
 
+def generate_certificate(db, enrolment):
+    """Thin wrapper: generates certificate PDF + record for a completed enrolment."""
+    user = enrolment.user
+    course = enrolment.cohort.course
+    return generate_certificate_pdf(db, user, course, enrolment)
+
+
 def revoke_certificate(db, cert_id: int, reason: str):
     from models.certificate import Certificate
     cert = db.query(Certificate).filter(Certificate.id == cert_id).first()

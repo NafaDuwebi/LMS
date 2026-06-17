@@ -7,8 +7,12 @@ from database import get_db
 from models.user import User
 from models.course import Course, LearningOutcome, Module, Material
 from models.assessment import Assessment
+from models.enrolment_request import EnrolmentRequest
+from models.material_view import MaterialView
+from models.cohort import Cohort, Enrolment
 from services.auth_service import get_current_user, require_role
 from services.notification_service import create_notification
+from services.audit_service import log_action
 from services.flash import flash
 import os
 import uuid
@@ -20,6 +24,27 @@ from template_utils import templates
 ALLOWED_MIME = {"pdf":"application/pdf","docx":"application/vnd.openxmlformats-officedocument.wordprocessingml.document","pptx":"application/vnd.openxmlformats-officedocument.presentationml.presentation","mp4":"video/mp4","png":"image/png","jpg":"image/jpeg"}
 
 
+def _can_access_material(db: Session, user: User, material: Material) -> bool:
+    """Return True if the user is allowed to view/download this material.
+    Admins and trainers always have access.
+    Learners must be actively enrolled in a cohort for the material's course.
+    """
+    if user.role in ("superadmin", "trainer"):
+        return True
+    course_id = material.module.course_id
+    enrolled = (
+        db.query(Enrolment)
+        .join(Cohort, Cohort.id == Enrolment.cohort_id)
+        .filter(
+            Enrolment.user_id == user.id,
+            Cohort.course_id == course_id,
+            Enrolment.status.in_(["enrolled", "completed"]),
+        )
+        .first()
+    )
+    return enrolled is not None
+
+
 def course_context(request, user, db):
     return {"request": request, "user": user}
 
@@ -29,12 +54,53 @@ def list_courses(request: Request, user: User = Depends(get_current_user), db: S
     if user.role == "superadmin":
         courses = db.query(Course).order_by(Course.created_at.desc()).all()
     elif user.role == "trainer":
-        from models.cohort import Cohort
-        course_ids = db.query(Cohort.course_id).filter(Cohort.trainer_id == user.id).distinct()
-        courses = db.query(Course).filter(Course.id.in_(course_ids)).all()
+        created = db.query(Course).filter(Course.created_by == user.id).all()
+        assigned = db.query(Course).join(Cohort).filter(Cohort.trainer_id == user.id).all()
+        seen = set()
+        courses = []
+        for c in created + assigned:
+            if c.id not in seen:
+                seen.add(c.id)
+                courses.append(c)
     else:
         courses = db.query(Course).filter(Course.is_published == True).all()
     return templates.TemplateResponse("shared/courses.html", {**course_context(request, user, db), "courses": courses})
+
+
+@router.get("/catalogue", response_class=HTMLResponse, name="courses.catalogue")
+def course_catalogue(request: Request, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    courses = db.query(Course).filter(Course.is_published == True).order_by(Course.title).all()
+    return templates.TemplateResponse("catalogue.html", {
+        "request": request, "user": user, "courses": courses,
+        "success": request.query_params.get("success"), "error": request.query_params.get("error"),
+    })
+
+
+@router.post("/{course_id}/request-enrolment", name="courses.request_enrolment")
+def request_enrolment(
+    request: Request, course_id: int, csrf_token: str = Form(default=""),
+    db: Session = Depends(get_db), user: User = Depends(get_current_user),
+):
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not course:
+        flash(request, "Course not found", "error")
+        return RedirectResponse(url="/courses/catalogue", status_code=302)
+    existing = db.query(EnrolmentRequest).filter(
+        EnrolmentRequest.user_id == user.id,
+        EnrolmentRequest.course_id == course_id,
+        EnrolmentRequest.status == "pending",
+    ).first()
+    if existing:
+        flash(request, "You already have a pending request for this course", "error")
+        return RedirectResponse(url="/courses/catalogue", status_code=302)
+    req = EnrolmentRequest(user_id=user.id, course_id=course_id)
+    db.add(req)
+    db.commit()
+    admins = db.query(User).filter(User.role == "superadmin", User.is_active == True).all()
+    for a in admins:
+        create_notification(db, a.id, "enrolment_request", f"New enrolment request from {user.full_name}", f"{user.full_name} requested enrolment in {course.title}.", action_url="/admin/enrolment-requests")
+    flash(request, "Enrolment request submitted", "success")
+    return RedirectResponse(url="/courses/catalogue", status_code=302)
 
 
 @router.get("/create", response_class=HTMLResponse, name="courses.create")
@@ -73,10 +139,51 @@ def create_course(
         cert_validity_years=cert_validity_years,
         credit_value=credit_value,
         created_by=user.id,
+        is_published=False,
+        status="draft",
     )
     db.add(course)
     db.commit()
+    log_action(db, user.id, "create_course", "course", course.id, f"Created course {course_code}: {title}")
     flash(request, "Course created", "success")
+    return RedirectResponse(url=f"/courses/{course.id}", status_code=302)
+
+
+@router.post("/{course_id}/submit-review", name="courses.submit_review")
+def submit_for_review(course_id: int, request: Request, csrf_token: str = Form(default=""), db: Session = Depends(get_db), user: User = Depends(require_role("trainer", "superadmin"))):
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not course:
+        raise HTTPException(status_code=404)
+    course.status = "in_review"
+    db.commit()
+    log_action(db, user.id, "submit_review", "course", course.id, f"Course {course.course_code} submitted for review")
+    flash(request, "Course submitted for review", "success")
+    return RedirectResponse(url=f"/courses/{course.id}", status_code=302)
+
+
+@router.post("/{course_id}/publish", name="courses.publish")
+def publish_course(course_id: int, request: Request, csrf_token: str = Form(default=""), db: Session = Depends(get_db), user: User = Depends(require_role("superadmin"))):
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not course:
+        raise HTTPException(status_code=404)
+    course.status = "published"
+    course.is_published = True
+    db.commit()
+    log_action(db, user.id, "publish_course", "course", course.id, f"Course {course.course_code} published")
+    flash(request, "Course published", "success")
+    return RedirectResponse(url=f"/courses/{course.id}", status_code=302)
+
+
+@router.post("/{course_id}/unpublish", name="courses.unpublish")
+def unpublish_course(course_id: int, request: Request, csrf_token: str = Form(default=""), db: Session = Depends(get_db), user: User = Depends(require_role("superadmin"))):
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not course:
+        raise HTTPException(status_code=404)
+    course.status = "draft"
+    course.is_published = False
+    db.commit()
+    log_action(db, user.id, "unpublish_course", "course", course.id, f"Course {course.course_code} unpublished")
+    flash(request, "Course unpublished", "success")
     return RedirectResponse(url=f"/courses/{course.id}", status_code=302)
 
 
@@ -139,6 +246,7 @@ def edit_course(
     course.credit_value = credit_value
     course.is_published = is_published
     db.commit()
+    log_action(db, user.id, "edit_course", "course", course.id, f"Edited course {course_code}: {title}")
     flash(request, "Course updated", "success")
     return RedirectResponse(url=f"/courses/{course.id}", status_code=302)
 
@@ -149,6 +257,7 @@ def delete_course(request: Request, course_id: int, db: Session = Depends(get_db
     if not course:
         flash(request, "Course not found", "error")
         return RedirectResponse(url="/courses", status_code=302)
+    log_action(db, user.id, "delete_course", "course", course_id, f"Deleted course {course.course_code}: {course.title}")
     db.delete(course)
     db.commit()
     flash(request, "Course deleted", "success")
@@ -295,8 +404,10 @@ def reorder_modules(module_id: int, request: Request, direction: str = Form("up"
 # ---- Material Management ----
 
 @router.get("/modules/{module_id}/materials/create", response_class=HTMLResponse, name="materials.create")
-def create_material_page(request: Request, module_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def create_material_page(request: Request, module_id: int, db: Session = Depends(get_db), user: User = Depends(require_role("superadmin", "trainer"))):
     module = db.query(Module).filter(Module.id == module_id).first()
+    if not module:
+        raise HTTPException(status_code=404, detail="Module not found")
     return templates.TemplateResponse("shared/material_form.html", {**course_context(request, user, db), "module": module})
 
 
@@ -364,11 +475,32 @@ def delete_material(request: Request, material_id: int, db: Session = Depends(ge
     return RedirectResponse(url=f"/courses/{course_id}", status_code=302)
 
 
+@router.get("/materials/{material_id}/view", name="materials.view")
+def view_material(material_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    material = db.query(Material).filter(Material.id == material_id).first()
+    if not material or not material.file_path:
+        raise HTTPException(status_code=404)
+    if not _can_access_material(db, user, material):
+        raise HTTPException(status_code=403, detail="You are not enrolled in this course")
+    from config import UPLOAD_DIR
+    safe_filename = os.path.basename(material.file_path)
+    full_path = os.path.join(UPLOAD_DIR, safe_filename)
+    real = os.path.realpath(full_path)
+    upload_real = os.path.realpath(UPLOAD_DIR)
+    if not real.startswith(upload_real):
+        raise HTTPException(status_code=403)
+    if not os.path.exists(full_path):
+        raise HTTPException(status_code=404)
+    return FileResponse(full_path, media_type="application/pdf", headers={"Content-Disposition": "inline"})
+
+
 @router.get("/materials/{material_id}/download", name="materials.download")
 def download_material(material_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     material = db.query(Material).filter(Material.id == material_id).first()
     if not material or not material.file_path:
         raise HTTPException(status_code=404)
+    if not _can_access_material(db, user, material):
+        raise HTTPException(status_code=403, detail="You are not enrolled in this course")
     from config import UPLOAD_DIR
     safe_filename = os.path.basename(material.file_path)
     full_path = os.path.join(UPLOAD_DIR, safe_filename)
@@ -379,4 +511,18 @@ def download_material(material_id: int, db: Session = Depends(get_db), user: Use
     if not os.path.exists(full_path):
         raise HTTPException(status_code=404)
     download_name = f"{material.title}{os.path.splitext(safe_filename)[1]}"
+    view = MaterialView(user_id=user.id, material_id=material_id)
+    db.add(view)
+    db.commit()
     return FileResponse(full_path, media_type='application/octet-stream', filename=download_name)
+
+
+@router.post("/materials/{material_id}/viewed", name="materials.viewed")
+def record_material_view(material_id: int, view_duration_seconds: int = Form(0), csrf_token: str = Form(default=""), db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    material = db.query(Material).filter(Material.id == material_id).first()
+    if not material:
+        raise HTTPException(status_code=404)
+    view = MaterialView(user_id=user.id, material_id=material_id, view_duration_seconds=view_duration_seconds)
+    db.add(view)
+    db.commit()
+    return JSONResponse({"ok": True})

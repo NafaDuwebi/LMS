@@ -2,6 +2,7 @@ import os
 from fastapi import APIRouter, Request, Depends, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from database import get_db
 from models.user import User
@@ -31,7 +32,7 @@ def login_page(request: Request):
 @limiter.limit("5/minute")
 def login(request: Request, username: str = Form(...), password: str = Form(...), csrf_token: str = Form(default=""), db: Session = Depends(get_db)):
     user = db.query(User).filter(
-        (User.username == username) | (User.email == username)
+        (func.lower(User.username) == username.lower()) | (func.lower(User.email) == username.lower())
     ).first()
 
     if not user:
@@ -53,7 +54,8 @@ def login(request: Request, username: str = Form(...), password: str = Form(...)
 
     token = create_access_token({"sub": str(user.id), "role": user.role, "ver": user.token_version or 0})
     flash(request, "Login successful", "success")
-    response = RedirectResponse(url="/dashboard", status_code=302)
+    redirect_url = "/auth/first-login" if user.force_password_change or user.requires_gdpr_consent else "/dashboard"
+    response = RedirectResponse(url=redirect_url, status_code=302)
     response.set_cookie(key="access_token", value=token, httponly=True, secure=os.getenv("ENV", "development") == "production", samesite="strict", max_age=28800)
     return response
 
@@ -69,6 +71,48 @@ def gdpr_consent_accept(request: Request, csrf_token: str = Form(default=""), db
     user.requires_gdpr_consent = False
     db.commit()
     flash(request, "GDPR consent accepted", "success")
+    return RedirectResponse(url="/dashboard", status_code=302)
+
+
+@router.get("/first-login", response_class=HTMLResponse)
+def first_login_page(request: Request, user: User = Depends(get_current_user)):
+    if not user.force_password_change and not user.requires_gdpr_consent:
+        return RedirectResponse(url="/dashboard", status_code=302)
+    return templates.TemplateResponse("auth/first_login.html", {"request": request, "user": user, "error": None})
+
+
+@router.post("/first-login")
+def first_login_submit(
+    request: Request,
+    new_password: str = Form(None),
+    gdpr_consent: bool = Form(False),
+    csrf_token: str = Form(default=""),
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    if user.force_password_change:
+        if not new_password:
+            return templates.TemplateResponse("auth/first_login.html", {"request": request, "user": user, "error": "You must set a new password."}, status_code=400)
+        try:
+            validate_password_strength(new_password)
+        except ValueError as e:
+            return templates.TemplateResponse("auth/first_login.html", {"request": request, "user": user, "error": str(e)}, status_code=400)
+        user.password_hash = hash_password(new_password)
+        user.force_password_change = False
+
+    if user.requires_gdpr_consent:
+        if not gdpr_consent:
+            return templates.TemplateResponse("auth/first_login.html", {"request": request, "user": user, "error": "You must consent to data processing to continue."}, status_code=400)
+        user.gdpr_consent_date = datetime.utcnow()
+        user.requires_gdpr_consent = False
+
+    import json
+    prefs = json.loads(user.notification_preferences or "{}")
+    user.notification_preferences = json.dumps(prefs)
+
+    db.commit()
+
+    flash(request, "Account setup complete", "success")
     return RedirectResponse(url="/dashboard", status_code=302)
 
 
@@ -104,11 +148,11 @@ def register(
     if not gdpr_consent:
         return templates.TemplateResponse("auth/register.html", {"request": request, "token": token, "error": "You must consent to data processing"}, status_code=400)
 
-    existing = db.query(User).filter(User.email == email).first()
+    existing = db.query(User).filter(func.lower(User.email) == email.lower()).first()
     if existing:
         return templates.TemplateResponse("auth/register.html", {"request": request, "token": token, "error": "Email already registered"}, status_code=400)
 
-    existing_username = db.query(User).filter(User.username == username).first()
+    existing_username = db.query(User).filter(func.lower(User.username) == username.lower()).first()
     if existing_username:
         return templates.TemplateResponse("auth/register.html", {"request": request, "token": token, "error": "Username already taken"}, status_code=400)
 
@@ -237,7 +281,7 @@ def forgot_password(
     csrf_token: str = Form(default=""),
     db: Session = Depends(get_db),
 ):
-    user = db.query(User).filter(User.email == email).first()
+    user = db.query(User).filter(func.lower(User.email) == email.lower()).first()
     if user:
         token = secrets.token_urlsafe(32)
         user.reset_token = token

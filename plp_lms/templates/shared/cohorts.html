@@ -3,12 +3,12 @@
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 py-8">
   <div class="flex items-center justify-between mb-8">
-    <h1 class="text-3xl font-bold" style="color: #1A2B4A;">Cohorts</h1>
+    <h1 class="text-3xl font-bold" style="color: #540032;">Cohorts</h1>
     <a href="/cohorts/create"
        class="px-5 py-2.5 rounded-md text-white font-medium transition-colors"
-       style="background-color: #C9912B;"
-       onmouseover="this.style.backgroundColor='#b47d24'"
-       onmouseout="this.style.backgroundColor='#C9912B'">
+       style="background-color: #FFC000;"
+       onmouseover="this.style.backgroundColor='#D4A000'"
+       onmouseout="this.style.backgroundColor='#FFC000'">
       + New Cohort
     </a>
   </div>
@@ -19,7 +19,7 @@
     <div class="bg-white shadow rounded-lg overflow-hidden border border-gray-100 hover:shadow-md transition-shadow">
       <div class="p-5">
         <div class="flex items-start justify-between mb-2">
-          <h2 class="text-lg font-semibold" style="color: #1A2B4A;">{{ cohort.name }}</h2>
+          <h2 class="text-lg font-semibold" style="color: #540032;">{{ cohort.name }}</h2>
           {% if cohort.is_active %}
           <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>
           {% else %}
@@ -47,7 +47,7 @@
           </div>
           {% if cohort.max_learners %}
           <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
-            <div class="h-2 rounded-full transition-all" style="background-color: #C9912B; width: {{ ((count / cohort.max_learners) * 100)|int }}%;"></div>
+            <div class="h-2 rounded-full transition-all" style="background-color: #FFC000; width: {{ ((count / cohort.max_learners) * 100)|int }}%;"></div>
           </div>
           {% endif %}
         </div>
@@ -55,9 +55,9 @@
         <div class="flex items-center gap-2 pt-2 border-t border-gray-100">
           <a href="/cohorts/{{ cohort.id }}"
              class="text-sm font-medium transition-colors"
-             style="color: #C9912B;"
-             onmouseover="this.style.color='#b47d24'"
-             onmouseout="this.style.color='#C9912B'">
+             style="color: #FFC000;"
+             onmouseover="this.style.color='#D4A000'"
+             onmouseout="this.style.color='#FFC000'">
             <i class="fas fa-eye mr-1"></i>View
           </a>
           <a href="/cohorts/{{ cohort.id }}/edit"
@@ -75,9 +75,9 @@
     <p class="text-gray-500 text-lg">No cohorts yet.</p>
     <a href="/cohorts/create"
        class="inline-block mt-4 px-5 py-2.5 rounded-md text-white font-medium transition-colors"
-       style="background-color: #C9912B;"
-       onmouseover="this.style.backgroundColor='#b47d24'"
-       onmouseout="this.style.backgroundColor='#C9912B'">
+       style="background-color: #FFC000;"
+       onmouseover="this.style.backgroundColor='#D4A000'"
+       onmouseout="this.style.backgroundColor='#FFC000'">
       Create your first cohort
     </a>
   </div>

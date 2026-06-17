@@ -3,10 +3,10 @@
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 py-6">
     <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold" style="color: #1A2B4A;">Welcome, {{ user.full_name or user.email }}</h1>
+        <h1 class="text-2xl font-bold" style="color: #540032;">Welcome, {{ user.full_name or user.email }}</h1>
         <a href="{{ '/learner/courses' }}"
            class="inline-flex items-center px-4 py-2 rounded font-semibold text-sm transition"
-           style="background-color: #C9912B; color: #fff;">
+           style="background-color: #FFC000; color: #fff;">
             <i class="fas fa-th-large mr-2"></i> View All Courses
         </a>
     </div>
@@ -14,14 +14,14 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 space-y-6">
             <div class="bg-white rounded-lg shadow-sm border p-5">
-                <h2 class="text-lg font-semibold mb-4" style="color: #1A2B4A;">
-                    <i class="fas fa-book-open mr-2" style="color: #C9912B;"></i> My Enrolled Courses
+                <h2 class="text-lg font-semibold mb-4" style="color: #540032;">
+                    <i class="fas fa-book-open mr-2" style="color: #FFC000;"></i> My Enrolled Courses
                 </h2>
                 {% if enrolments %}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {% for e in enrolments %}
                     <div class="border rounded-lg p-4 hover:shadow-md transition">
-                        <h3 class="font-semibold text-base" style="color: #1A2B4A;">{{ e.cohort.course.title }}</h3>
+                        <h3 class="font-semibold text-base" style="color: #540032;">{{ e.cohort.course.title }}</h3>
                         <p class="text-sm text-gray-500 mt-1">{{ e.cohort.name }}</p>
 
                         {% set pct = e.final_score if e.final_score is not none else 0 %}
@@ -31,7 +31,7 @@
                                 <span>{{ pct }}%</span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-2">
-                                <div class="h-2 rounded-full transition-all" style="width: {{ pct }}%; background-color: #C9912B;"></div>
+                                <div class="h-2 rounded-full transition-all" style="width: {{ pct }}%; background-color: #FFC000;"></div>
                             </div>
                         </div>
 
@@ -43,7 +43,7 @@
                                 {{ e.status|title }}
                             </span>
                             <a href="/learner/course/{{ e.cohort.course.id }}"
-                               class="text-sm font-medium transition" style="color: #C9912B;">
+                               class="text-sm font-medium transition" style="color: #FFC000;">
                                 Continue <i class="fas fa-arrow-right ml-1"></i>
                             </a>
                         </div>
@@ -58,15 +58,15 @@
 
         <div class="space-y-6">
             <div class="bg-white rounded-lg shadow-sm border p-5">
-                <h2 class="text-lg font-semibold mb-3" style="color: #1A2B4A;">
-                    <i class="fas fa-bell mr-2" style="color: #C9912B;"></i> Recent Notifications
+                <h2 class="text-lg font-semibold mb-3" style="color: #540032;">
+                    <i class="fas fa-bell mr-2" style="color: #FFC000;"></i> Recent Notifications
                 </h2>
                 {% if notifications %}
                 <ul class="divide-y">
                     {% for n in notifications %}
                     <li class="py-3">
-                        <p class="text-sm font-medium" style="color: #1A2B4A;">{{ n.title }}</p>
-                        <p class="text-xs text-gray-500 mt-0.5">{{ n.message[:120] }}{% if n.message|length > 120 %}...{% endif %}</p>
+                        <p class="text-sm font-medium" style="color: #540032;">{{ n.title }}</p>
+                        <p class="text-xs text-gray-500 mt-0.5">{{ (n.message or '')[:120] }}{% if (n.message or '')|length > 120 %}...{% endif %}</p>
                         {% if n.created_at %}
                         <span class="text-xs text-gray-400 mt-1 block">{{ n.created_at.strftime('%d %b %Y') }}</span>
                         {% endif %}

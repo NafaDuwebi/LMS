@@ -18,13 +18,26 @@ def generate_csv(data: List[Dict], headers: List[str]) -> str:
 
 def generate_cohort_summary_report(db, cohort_id: int):
     from models.cohort import Cohort, Enrolment
+    from models.attendance import AttendanceRecord
+    from models.system_settings import SystemSetting
     cohort = db.query(Cohort).filter(Cohort.id == cohort_id).first()
     if not cohort:
         return None
 
+    all_session_dates = set(r.session_date for r in db.query(AttendanceRecord).filter(AttendanceRecord.cohort_id == cohort_id).all())
+    total_sessions = len(all_session_dates)
+    min_attendance_setting = db.query(SystemSetting).filter_by(key="min_attendance").first()
+    min_attendance = int(min_attendance_setting.value) if min_attendance_setting and min_attendance_setting.value else 80
+
     enrolments = db.query(Enrolment).options(joinedload(Enrolment.user)).filter(Enrolment.cohort_id == cohort_id).all()
     data = []
     for en in enrolments:
+        attended = db.query(AttendanceRecord).filter(
+            AttendanceRecord.enrolment_id == en.id,
+            AttendanceRecord.attended == True,
+        ).count()
+        attendance_pct = round(attended / total_sessions * 100, 1) if total_sessions > 0 else None
+        meets_attendance = attendance_pct >= min_attendance if attendance_pct is not None else None
         data.append({
             "learner_name": en.user.full_name if en.user else "",
             "email": en.user.email if en.user else "",
@@ -32,6 +45,8 @@ def generate_cohort_summary_report(db, cohort_id: int):
             "enrolled_date": en.enrolled_at.strftime("%Y-%m-%d") if en.enrolled_at else "",
             "completion_date": en.completion_date.strftime("%Y-%m-%d") if en.completion_date else "",
             "final_score": en.final_score or "",
+            "attendance_pct": attendance_pct,
+            "meets_attendance": meets_attendance,
         })
     return data
 

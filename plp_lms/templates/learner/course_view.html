@@ -3,13 +3,13 @@
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 py-6">
     <nav class="text-sm text-gray-500 mb-4">
-        <a href="/learner/courses" class="hover:underline" style="color: #C9912B;">My Courses</a>
+        <a href="/learner/courses" class="hover:underline" style="color: #FFC000;">My Courses</a>
         <span class="mx-2">/</span>
-        <span style="color: #1A2B4A;">{{ course.title }}</span>
+        <span style="color: #540032;">{{ course.title }}</span>
     </nav>
 
     <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
-        <h1 class="text-2xl font-bold" style="color: #1A2B4A;">{{ course.title }}</h1>
+        <h1 class="text-2xl font-bold" style="color: #540032;">{{ course.title }}</h1>
         {% if course.description %}
         <p class="text-gray-600 mt-2">{{ course.description }}</p>
         {% endif %}
@@ -21,7 +21,7 @@
         <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
             <button onclick="toggleModule({{ loop.index }})"
                     class="w-full flex items-center justify-between p-4 text-left transition hover:bg-gray-50"
-                    style="color: #1A2B4A;">
+                    style="color: #540032;">
                 <div class="flex items-center gap-3">
                     {% if ms.is_completed %}
                     <i class="fas fa-check-circle text-green-500"></i>
@@ -42,7 +42,7 @@
                     <span><i class="fas fa-file mr-1"></i> {{ ms.material_count }} materials</span>
                     <span><i class="fas fa-tasks mr-1"></i> {{ ms.assessment_count }} assessments</span>
                     {% if ms.assessment_count > 0 %}
-                    <span><i class="fas fa-check mr-1" style="color: #C9912B;"></i> {{ ms.passed_assessments }} passed</span>
+                    <span><i class="fas fa-check mr-1" style="color: #FFC000;"></i> {{ ms.passed_assessments }} passed</span>
                     {% endif %}
                 </div>
 
@@ -52,11 +52,25 @@
                     <ul class="divide-y">
                         {% for mat in ms.materials %}
                         <li class="py-1.5">
+                            {% if mat.url %}
+                            <a href="{{ mat.url }}" target="_blank" rel="noopener noreferrer"
+                               class="material-link text-sm flex items-center gap-2 hover:underline"
+                               style="color: #FFC000;" data-material-id="{{ mat.id }}">
+                                <i class="fas fa-external-link-alt"></i> {{ mat.title }}
+                            </a>
+                            {% elif mat.file_type == 'pdf' %}
+                            <button onclick='openPdfViewer("/courses/materials/{{ mat.id }}/view")'
+                                    class="text-sm flex items-center gap-2 hover:underline cursor-pointer"
+                                    style="color: #FFC000;">
+                                <i class="fas fa-file-pdf"></i> {{ mat.title }}
+                            </button>
+                            {% else %}
                             <a href="/courses/materials/{{ mat.id }}/download"
-                               class="text-sm flex items-center gap-2 hover:underline"
-                               style="color: #C9912B;">
+                               class="material-link text-sm flex items-center gap-2 hover:underline"
+                               style="color: #FFC000;" data-material-id="{{ mat.id }}">
                                 <i class="fas fa-download"></i> {{ mat.title }}
                             </a>
+                            {% endif %}
                         </li>
                         {% endfor %}
                     </ul>
@@ -72,7 +86,7 @@
                             <span class="text-sm">{{ ass.title }}</span>
                             <a href="/assessments/{{ ass.id }}/take"
                                class="text-sm font-medium hover:underline"
-                               style="color: #C9912B;">
+                               style="color: #FFC000;">
                                 <i class="fas fa-arrow-right mr-1"></i> Take Assessment
                             </a>
                         </li>
@@ -86,14 +100,49 @@
     </div>
     {% else %}
     <div class="bg-white rounded-lg shadow-sm border p-8 text-center">
-        <i class="fas fa-cubes text-4xl mb-3" style="color: #C9912B;"></i>
+        <i class="fas fa-cubes text-4xl mb-3" style="color: #FFC000;"></i>
         <p class="text-gray-500">No modules available for this course yet.</p>
     </div>
     {% endif %}
+
+    {% set course_assessments = course.assessments | selectattr("module_id", "equalto", none) | list %}
+    {% if course_assessments %}
+    <div class="bg-white rounded-lg shadow-sm border p-5 mt-4">
+        <h2 class="text-base font-semibold mb-3" style="color: #540032;">
+            <i class="fas fa-tasks mr-2" style="color: #FFC000;"></i> Course Assessments
+        </h2>
+        <ul class="divide-y">
+            {% for ass in course_assessments %}
+            <li class="py-3 flex items-center justify-between">
+                <span class="text-sm font-medium" style="color: #540032;">{{ ass.title }}</span>
+                <a href="/assessments/{{ ass.id }}/take"
+                   class="inline-flex items-center px-4 py-1.5 rounded text-sm font-semibold transition"
+                   style="background-color: #FFC000; color: #fff;">
+                    <i class="fas fa-pen mr-2"></i> Take Assessment
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+
+<!-- PDF Viewer Modal -->
+<div id="pdfViewerModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-70 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-5xl h-[90vh] flex flex-col">
+        <div class="flex items-center justify-between px-4 py-3 border-b">
+            <h3 class="font-semibold text-lg" style="color: #540032;">PDF Viewer</h3>
+            <button onclick="closePdfViewer()" class="text-gray-500 hover:text-gray-700 text-2xl leading-none">&times;</button>
+        </div>
+        <div class="flex-1 min-h-0">
+            <iframe id="pdfIframe" src="" class="w-full h-full border-0"></iframe>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 <script>
 function toggleModule(index) {
     var el = document.getElementById('module-' + index);
@@ -106,5 +155,42 @@ function toggleModule(index) {
         ch.style.transform = 'rotate(0deg)';
     }
 }
+
+document.querySelectorAll('.material-link').forEach(function(link) {
+    link.addEventListener('click', function(e) {
+        var materialId = this.dataset.materialId;
+        var formData = new FormData();
+        formData.append('material_id', materialId);
+        formData.append('view_duration_seconds', 0);
+        formData.append('csrf_token', '');
+        navigator.sendBeacon('/courses/materials/' + materialId + '/viewed', formData);
+    });
+});
+
+function openPdfViewer(url) {
+    var iframe = document.getElementById('pdfIframe');
+    iframe.src = url;
+    document.getElementById('pdfViewerModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closePdfViewer() {
+    var iframe = document.getElementById('pdfIframe');
+    iframe.src = '';
+    document.getElementById('pdfViewerModal').classList.add('hidden');
+    document.body.style.overflow = '';
+}
+
+document.getElementById('pdfIframe').addEventListener('load', function() {
+    var match = this.src.match(/\/courses\/materials\/(\d+)\/view/);
+    if (match) {
+        var materialId = match[1];
+        var formData = new FormData();
+        formData.append('material_id', materialId);
+        formData.append('view_duration_seconds', 0);
+        formData.append('csrf_token', '');
+        navigator.sendBeacon('/courses/materials/' + materialId + '/viewed', formData);
+    }
+});
 </script>
 {% endblock %}

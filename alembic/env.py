@@ -19,10 +19,12 @@ from config import DATABASE_URL  # noqa: E402
 from database import Base         # noqa: E402  (imports all models via init_db logic)
 
 # Import every model so Base.metadata is fully populated for autogenerate
+import models.department
 import models.user, models.course, models.cohort, models.assessment
 import models.submission, models.certificate, models.training_record
 import models.notification, models.audit, models.learning_path
 import models.skill, models.document, models.message, models.rpl
+import models.system_settings, models.training_plan
 import models.report_subscription, models.retention
 
 # this is the Alembic Config object, which provides

@@ -5,8 +5,8 @@
 {% block content %}
 <div class="max-w-2xl mx-auto">
     <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold text-[#1A2B4A]">{{ "Edit User" if edit_user else "Create User" }}</h1>
-        <a href="/admin/users" class="text-sm text-gray-500 hover:text-[#1A2B4A] transition-colors">
+        <h1 class="text-2xl font-bold text-[#540032]">{{ "Edit User" if edit_user else "Create User" }}</h1>
+        <a href="/admin/users" class="text-sm text-gray-500 hover:text-[#540032] transition-colors">
             <i class="fas fa-arrow-left mr-1"></i> Back to Users
         </a>
     </div>
@@ -19,29 +19,41 @@
             <div>
                 <label for="full_name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
                 <input type="text" name="full_name" id="full_name" value="{{ edit_user.full_name if edit_user else '' }}" required aria-required="true"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-transparent outline-none transition-colors">
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-transparent outline-none transition-colors">
             </div>
 
             <div>
                 <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
                 <input type="text" name="username" id="username" value="{{ edit_user.username if edit_user else '' }}" required aria-required="true"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-transparent outline-none transition-colors">
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-transparent outline-none transition-colors">
             </div>
 
             <div>
                 <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                 <input type="email" name="email" id="email" value="{{ edit_user.email if edit_user else '' }}" required aria-required="true"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-transparent outline-none transition-colors">
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-transparent outline-none transition-colors">
             </div>
 
             <div>
                 <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Role</label>
                 <select name="role" id="role" required aria-required="true"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-transparent outline-none transition-colors bg-white">
-                    <option value="superadmin" {{ "selected" if edit_user and edit_user.role == 'superadmin' else '' }}>Superadmin</option>
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-transparent outline-none transition-colors bg-white">
+                    <option value="learner" {{ "selected" if not edit_user or edit_user.role == 'learner' else '' }}>Learner</option>
                     <option value="trainer" {{ "selected" if edit_user and edit_user.role == 'trainer' else '' }}>Trainer</option>
-                    <option value="learner" {{ "selected" if edit_user and edit_user.role == 'learner' else '' }}>Learner</option>
                     <option value="observer" {{ "selected" if edit_user and edit_user.role == 'observer' else '' }}>Observer</option>
+                    <option value="external_assessor" {{ "selected" if edit_user and edit_user.role == 'external_assessor' else '' }}>External Assessor</option>
+                    <option value="superadmin" {{ "selected" if edit_user and edit_user.role == 'superadmin' else '' }}>Superadmin</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="department_id" class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                <select name="department_id" id="department_id"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-transparent outline-none transition-colors bg-white">
+                    <option value="">None</option>
+                    {% for d in departments %}
+                    <option value="{{ d.id }}" {{ "selected" if edit_user and edit_user.department_id == d.id else '' }}>{{ d.name }}</option>
+                    {% endfor %}
                 </select>
             </div>
 
@@ -49,29 +61,29 @@
             <div>
                 <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
                 <input type="password" name="password" id="password" required aria-required="true"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-transparent outline-none transition-colors">
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-transparent outline-none transition-colors">
             </div>
             {% else %}
             <div>
                 <label for="new_password" class="block text-sm font-medium text-gray-700 mb-1">New Password (leave blank to keep current)</label>
                 <input type="password" name="new_password" id="new_password"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-transparent outline-none transition-colors">
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-transparent outline-none transition-colors">
             </div>
             <div class="flex items-center gap-3">
                 <input type="checkbox" name="is_active" id="is_active" value="1" {{ "checked" if edit_user.is_active else '' }}
-                       class="w-4 h-4 text-[#C9912B] border-gray-300 rounded focus:ring-[#C9912B]">
+                       class="w-4 h-4 text-[#FFC000] border-gray-300 rounded focus:ring-[#FFC000]">
                 <label for="is_active" class="text-sm font-medium text-gray-700">Active</label>
             </div>
             <div class="flex items-center gap-3">
                 <input type="checkbox" name="force_password_change" id="force_password_change" value="1" {{ "checked" if edit_user.force_password_change else '' }}
-                       class="w-4 h-4 text-[#C9912B] border-gray-300 rounded focus:ring-[#C9912B]">
+                       class="w-4 h-4 text-[#FFC000] border-gray-300 rounded focus:ring-[#FFC000]">
                 <label for="force_password_change" class="text-sm font-medium text-gray-700">Force password change on next login</label>
             </div>
             {% endif %}
 
             <div class="flex items-center gap-3 pt-2">
                 <button type="submit"
-                        class="px-6 py-2.5 bg-[#1A2B4A] text-white font-medium rounded-lg hover:bg-[#243b60] transition-colors">
+                        class="px-6 py-2.5 bg-[#540032] text-white font-medium rounded-lg hover:bg-[#243b60] transition-colors">
                     <i class="fas fa-save mr-2"></i>{{ "Update User" if edit_user else "Create User" }}
                 </button>
                 <a href="/admin/users"

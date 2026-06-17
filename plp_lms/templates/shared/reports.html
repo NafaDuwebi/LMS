@@ -2,87 +2,105 @@
 {% block title %}Reports{% endblock %}
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 py-6">
-    <h1 class="text-2xl font-bold mb-6" style="color: #1A2B4A;">Reports</h1>
+    <h1 class="text-2xl font-bold mb-6" style="color: #540032;">Reports</h1>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div class="bg-white rounded-lg shadow border border-gray-200 p-5">
             <div class="flex items-center gap-3 mb-4">
-                <i class="fas fa-users text-2xl" style="color: #C9912B;"></i>
+                <i class="fas fa-users text-2xl" style="color: #FFC000;"></i>
                 <h3 class="text-lg font-semibold text-gray-900">Cohort Summary</h3>
             </div>
             <form method="POST" action="{{ '/reports/cohort-summary' }}" class="space-y-3">
     <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
                 <input type="hidden" name="dummy_token" value="dummy">
-                <select name="cohort_id" id="cohort_id" required aria-required="true" aria-label="Cohort" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2" style="focus:ring-color: #C9912B;">
+                <select name="cohort_id" id="cohort_id" required aria-required="true" aria-label="Cohort" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2" style="focus:ring-color: #FFC000;">
                     <option value="">Select cohort...</option>
                     {% for cohort in cohorts %}
                     <option value="{{ cohort.id }}">{{ cohort.name }}</option>
                     {% endfor %}
                 </select>
-                <button type="submit" class="w-full px-4 py-2 rounded text-white text-sm font-medium hover:opacity-90" style="background-color: #1A2B4A;">
+                <button type="submit" class="w-full px-4 py-2 rounded text-white text-sm font-medium hover:opacity-90" style="background-color: #540032;">
                     <i class="fas fa-file-alt mr-1"></i>Generate
                 </button>
             </form>
+            <div class="flex gap-2 mt-3">
+                <a id="cohort-pdf-link" href="#" class="flex-1 text-center px-3 py-1.5 rounded text-xs font-medium border border-gray-300 text-gray-600 hover:bg-gray-50 pointer-events-none opacity-50"><i class="fas fa-file-pdf mr-1"></i>PDF</a>
+                <a id="cohort-xlsx-link" href="#" class="flex-1 text-center px-3 py-1.5 rounded text-xs font-medium border border-gray-300 text-gray-600 hover:bg-gray-50 pointer-events-none opacity-50"><i class="fas fa-file-excel mr-1"></i>XLSX</a>
+            </div>
         </div>
 
         <div class="bg-white rounded-lg shadow border border-gray-200 p-5">
             <div class="flex items-center gap-3 mb-4">
-                <i class="fas fa-chart-line text-2xl" style="color: #C9912B;"></i>
+                <i class="fas fa-chart-line text-2xl" style="color: #FFC000;"></i>
                 <h3 class="text-lg font-semibold text-gray-900">Learner Progress</h3>
             </div>
             <form method="POST" action="{{ '/reports/learner-progress' }}" class="space-y-3">
                 <input type="hidden" name="dummy_token" value="dummy">
-                <select name="course_id" id="course_id" required aria-required="true" aria-label="Course" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2" style="focus:ring-color: #C9912B;">
+                <select name="course_id" id="course_id" required aria-required="true" aria-label="Course" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2" style="focus:ring-color: #FFC000;">
                     <option value="">Select course...</option>
                     {% for course in courses %}
                     <option value="{{ course.id }}">{{ course.title }}</option>
                     {% endfor %}
                 </select>
-                <select name="learner_id" id="learner_id" required aria-required="true" aria-label="Learner" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2" style="focus:ring-color: #C9912B;">
-                    <option value="">Select learner...</option>
-                </select>
-                <button type="submit" class="w-full px-4 py-2 rounded text-white text-sm font-medium hover:opacity-90" style="background-color: #1A2B4A;">
+                <input type="text" name="learner_name" id="learner_name" placeholder="Search learner..." autocomplete="off" required aria-required="true" aria-label="Learner" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2" style="focus:ring-color: #FFC000;">
+                <input type="hidden" name="learner_id" id="learner_id" required>
+                <datalist id="learner_list"></datalist>
+                <button type="submit" class="w-full px-4 py-2 rounded text-white text-sm font-medium hover:opacity-90" style="background-color: #540032;">
                     <i class="fas fa-file-alt mr-1"></i>Generate
                 </button>
             </form>
+            <div class="flex gap-2 mt-3">
+                <a id="progress-pdf-link" href="#" class="flex-1 text-center px-3 py-1.5 rounded text-xs font-medium border border-gray-300 text-gray-600 hover:bg-gray-50 pointer-events-none opacity-50"><i class="fas fa-file-pdf mr-1"></i>PDF</a>
+                <a id="progress-xlsx-link" href="#" class="flex-1 text-center px-3 py-1.5 rounded text-xs font-medium border border-gray-300 text-gray-600 hover:bg-gray-50 pointer-events-none opacity-50"><i class="fas fa-file-excel mr-1"></i>XLSX</a>
+            </div>
         </div>
 
         <div class="bg-white rounded-lg shadow border border-gray-200 p-5">
             <div class="flex items-center gap-3 mb-4">
-                <i class="fas fa-certificate text-2xl" style="color: #C9912B;"></i>
+                <i class="fas fa-certificate text-2xl" style="color: #FFC000;"></i>
                 <h3 class="text-lg font-semibold text-gray-900">Certificate Register</h3>
             </div>
             <form method="POST" action="{{ '/reports/certificate-register' }}" class="space-y-3">
                 <input type="hidden" name="dummy_token" value="dummy">
-                <select name="course_id" id="cert_course_id" aria-label="Course" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2" style="focus:ring-color: #C9912B;">
+                <select name="course_id" id="cert_course_id" aria-label="Course" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2" style="focus:ring-color: #FFC000;">
                     <option value="">All courses</option>
                     {% for course in courses %}
                     <option value="{{ course.id }}">{{ course.title }}</option>
                     {% endfor %}
                 </select>
-                <button type="submit" class="w-full px-4 py-2 rounded text-white text-sm font-medium hover:opacity-90" style="background-color: #1A2B4A;">
+                <button type="submit" class="w-full px-4 py-2 rounded text-white text-sm font-medium hover:opacity-90" style="background-color: #540032;">
                     <i class="fas fa-file-alt mr-1"></i>Generate
                 </button>
             </form>
+            <div class="flex gap-2 mt-3">
+                <a href="/reports/certificate-register/pdf" class="flex-1 text-center px-3 py-1.5 rounded text-xs font-medium border border-gray-300 text-gray-600 hover:bg-gray-50"><i class="fas fa-file-pdf mr-1"></i>PDF</a>
+                <a href="/reports/certificate-register/xlsx" class="flex-1 text-center px-3 py-1.5 rounded text-xs font-medium border border-gray-300 text-gray-600 hover:bg-gray-50"><i class="fas fa-file-excel mr-1"></i>XLSX</a>
+                <a href="/reports/certificate-register/csv" class="flex-1 text-center px-3 py-1.5 rounded text-xs font-medium border border-gray-300 text-gray-600 hover:bg-gray-50"><i class="fas fa-file-csv mr-1"></i>CSV</a>
+            </div>
         </div>
 
         <div class="bg-white rounded-lg shadow border border-gray-200 p-5">
             <div class="flex items-center gap-3 mb-4">
-                <i class="fas fa-clipboard-check text-2xl" style="color: #C9912B;"></i>
+                <i class="fas fa-clipboard-check text-2xl" style="color: #FFC000;"></i>
                 <h3 class="text-lg font-semibold text-gray-900">Compliance Report</h3>
             </div>
             <form method="POST" action="{{ '/reports/compliance' }}" class="space-y-3">
                 <input type="hidden" name="dummy_token" value="dummy">
-                <select name="cohort_id" id="compliance_cohort_id" required aria-required="true" aria-label="Cohort" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2" style="focus:ring-color: #C9912B;">
+                <select name="cohort_id" id="compliance_cohort_id" required aria-required="true" aria-label="Cohort" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2" style="focus:ring-color: #FFC000;">
                     <option value="">Select cohort...</option>
                     {% for cohort in cohorts %}
                     <option value="{{ cohort.id }}">{{ cohort.name }}</option>
                     {% endfor %}
                 </select>
-                <button type="submit" class="w-full px-4 py-2 rounded text-white text-sm font-medium hover:opacity-90" style="background-color: #1A2B4A;">
+                <button type="submit" class="w-full px-4 py-2 rounded text-white text-sm font-medium hover:opacity-90" style="background-color: #540032;">
                     <i class="fas fa-file-alt mr-1"></i>Generate
                 </button>
             </form>
+            <div class="flex gap-2 mt-3">
+                <a href="/reports/compliance/pdf" class="flex-1 text-center px-3 py-1.5 rounded text-xs font-medium border border-gray-300 text-gray-600 hover:bg-gray-50"><i class="fas fa-file-pdf mr-1"></i>PDF</a>
+                <a href="/reports/compliance/xlsx" class="flex-1 text-center px-3 py-1.5 rounded text-xs font-medium border border-gray-300 text-gray-600 hover:bg-gray-50"><i class="fas fa-file-excel mr-1"></i>XLSX</a>
+                <a href="/reports/compliance/csv" class="flex-1 text-center px-3 py-1.5 rounded text-xs font-medium border border-gray-300 text-gray-600 hover:bg-gray-50"><i class="fas fa-file-csv mr-1"></i>CSV</a>
+            </div>
         </div>
     </div>
 
@@ -95,6 +113,43 @@
 </div>
 
 <script>
+var learnerTimeout;
+document.getElementById('learner_name').addEventListener('input', function() {
+    clearTimeout(learnerTimeout);
+    var val = this.value.trim();
+    if (val.length < 1) { document.getElementById('learner_id').value = ''; return; }
+    learnerTimeout = setTimeout(function() {
+        fetch('/api/users/search?q=' + encodeURIComponent(val) + '&role=learner')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var list = document.getElementById('learner_list');
+                list.innerHTML = '';
+                data.forEach(function(u) {
+                    var opt = document.createElement('option');
+                    opt.value = u.full_name + ' (' + u.email + ')';
+                    opt.dataset.id = u.id;
+                    list.appendChild(opt);
+                });
+            });
+    }, 300);
+});
+
+document.getElementById('learner_name').addEventListener('change', function() {
+    var list = document.getElementById('learner_list');
+    var match = null;
+    for (var i = 0; i < list.options.length; i++) {
+        if (list.options[i].value === this.value) {
+            match = list.options[i];
+            break;
+        }
+    }
+    if (match) {
+        document.getElementById('learner_id').value = match.dataset.id;
+    } else {
+        document.getElementById('learner_id').value = '';
+    }
+});
+
 document.querySelectorAll('form').forEach(function(form) {
     form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -111,5 +166,43 @@ document.querySelectorAll('form').forEach(function(form) {
             });
     });
 });
+
+function updateExportLinks() {
+    var cohortId = document.getElementById('cohort_id').value;
+    var cohortPdf = document.getElementById('cohort-pdf-link');
+    var cohortXlsx = document.getElementById('cohort-xlsx-link');
+    if (cohortId) {
+        cohortPdf.href = '/reports/cohort-summary/pdf?cohort_id=' + cohortId;
+        cohortXlsx.href = '/reports/cohort-summary/xlsx?cohort_id=' + cohortId;
+        cohortPdf.classList.remove('pointer-events-none', 'opacity-50');
+        cohortXlsx.classList.remove('pointer-events-none', 'opacity-50');
+    } else {
+        cohortPdf.href = '#';
+        cohortXlsx.href = '#';
+        cohortPdf.classList.add('pointer-events-none', 'opacity-50');
+        cohortXlsx.classList.add('pointer-events-none', 'opacity-50');
+    }
+
+    var courseId = document.getElementById('course_id').value;
+    var learnerId = document.getElementById('learner_id').value;
+    var progPdf = document.getElementById('progress-pdf-link');
+    var progXlsx = document.getElementById('progress-xlsx-link');
+    if (courseId && learnerId) {
+        progPdf.href = '/reports/learner-progress/pdf?course_id=' + courseId + '&learner_id=' + learnerId;
+        progXlsx.href = '/reports/learner-progress/xlsx?course_id=' + courseId + '&learner_id=' + learnerId;
+        progPdf.classList.remove('pointer-events-none', 'opacity-50');
+        progXlsx.classList.remove('pointer-events-none', 'opacity-50');
+    } else {
+        progPdf.href = '#';
+        progXlsx.href = '#';
+        progPdf.classList.add('pointer-events-none', 'opacity-50');
+        progXlsx.classList.add('pointer-events-none', 'opacity-50');
+    }
+}
+
+document.getElementById('cohort_id').addEventListener('change', updateExportLinks);
+document.getElementById('course_id').addEventListener('change', updateExportLinks);
+document.getElementById('learner_name').addEventListener('change', updateExportLinks);
+updateExportLinks();
 </script>
 {% endblock %}

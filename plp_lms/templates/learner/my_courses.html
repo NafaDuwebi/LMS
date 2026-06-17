@@ -3,7 +3,7 @@
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 py-6">
     <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold" style="color: #1A2B4A;"><i class="fas fa-graduation-cap mr-2" style="color: #C9912B;"></i> My Courses</h1>
+        <h1 class="text-2xl font-bold" style="color: #540032;"><i class="fas fa-graduation-cap mr-2" style="color: #FFC000;"></i> My Courses</h1>
     </div>
 
     {% if course_progress %}
@@ -15,7 +15,7 @@
         {% set prog = item.progress %}
         <div class="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition flex flex-col">
             <div class="p-5 flex-1">
-                <h3 class="font-bold text-lg" style="color: #1A2B4A;">{{ course.title }}</h3>
+                <h3 class="font-bold text-lg" style="color: #540032;">{{ course.title }}</h3>
                 {% if cohort.name %}
                 <p class="text-sm text-gray-500 mt-1">{{ cohort.name }}</p>
                 {% endif %}
@@ -38,14 +38,14 @@
                         <span>{{ prog.progress_pct }}%</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-2.5">
-                        <div class="h-2.5 rounded-full transition-all" style="width: {{ prog.progress_pct }}%; background-color: #C9912B;"></div>
+                        <div class="h-2.5 rounded-full transition-all" style="width: {{ prog.progress_pct }}%; background-color: #FFC000;"></div>
                     </div>
                 </div>
 
                 {% if enrolment.final_score is not none %}
                 <div class="mt-3 text-sm">
                     <span class="text-gray-600">Final Score:</span>
-                    <span class="font-semibold" style="color: #1A2B4A;">{{ enrolment.final_score }}%</span>
+                    <span class="font-semibold" style="color: #540032;">{{ enrolment.final_score }}%</span>
                 </div>
                 {% endif %}
             </div>
@@ -53,7 +53,7 @@
             <div class="px-5 py-3 border-t bg-gray-50">
                 <a href="/learner/course/{{ course.id }}"
                    class="block text-center px-4 py-2 rounded font-semibold text-sm transition"
-                   style="background-color: #C9912B; color: #fff;">
+                   style="background-color: #FFC000; color: #fff;">
                     <i class="fas fa-play-circle mr-1"></i> Continue
                 </a>
             </div>
@@ -62,11 +62,11 @@
     </div>
     {% else %}
     <div class="bg-white rounded-lg shadow-sm border p-8 text-center">
-        <i class="fas fa-book-open text-4xl mb-3" style="color: #C9912B;"></i>
+        <i class="fas fa-book-open text-4xl mb-3" style="color: #FFC000;"></i>
         <p class="text-gray-500">You are not enrolled in any courses yet.</p>
         <a href="{{ '/courses' }}"
            class="inline-block mt-4 px-5 py-2 rounded font-semibold text-sm transition"
-           style="background-color: #C9912B; color: #fff;">
+           style="background-color: #FFC000; color: #fff;">
             Browse Courses
         </a>
     </div>

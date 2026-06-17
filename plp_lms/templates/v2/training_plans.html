@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Training Plans{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-6">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold" style="color: #540032;"><i class="fas fa-clipboard-list mr-2" style="color: #FFC000;"></i> Training Plans</h1>
+        <a href="/training-plans/create" class="px-4 py-2 rounded text-sm font-semibold text-white" style="background-color: #FFC000;">
+            <i class="fas fa-plus mr-1"></i> New Plan
+        </a>
+    </div>
+
+    {% for plan in plans %}
+    <div class="bg-white rounded-lg shadow-sm border p-5 mb-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-lg font-semibold" style="color: #540032;">{{ plan.title }}</h2>
+                <p class="text-sm text-gray-600 mt-1">{{ plan.description or 'No description' }}</p>
+            </div>
+            <div class="flex items-center gap-2">
+                {% if plan.is_active %}
+                <span class="text-xs px-2 py-1 rounded bg-green-100 text-green-700">Active</span>
+                {% else %}
+                <span class="text-xs px-2 py-1 rounded bg-gray-100 text-gray-500">Inactive</span>
+                {% endif %}
+                <a href="/training-plans/{{ plan.id }}/edit" class="px-3 py-1.5 rounded text-xs font-semibold border hover:bg-gray-50" style="border-color: #FFC000; color: #FFC000;">Manage</a>
+                {% if user.role == 'superadmin' %}
+                <form method="POST" action="/training-plans/{{ plan.id }}/delete" data-confirm="Delete this plan?" class="inline">
+                    <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+                    <button type="submit" class="px-3 py-1.5 rounded text-xs font-semibold border border-red-300 text-red-600 hover:bg-red-50">Delete</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-12 text-gray-500">
+        <i class="fas fa-clipboard-list text-4xl mb-3"></i>
+        <p>No training plans yet.</p>
+        <a href="/training-plans/create" class="inline-block mt-3 px-4 py-2 rounded text-sm font-semibold text-white" style="background-color: #FFC000;">Create the first plan</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -4,18 +4,24 @@
 <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="mb-6 flex items-center justify-between">
     <div>
-      <a href="/assessments" class="text-sm text-gray-500 hover:text-[#C9912B] transition">
+      <a href="/assessments" class="text-sm text-gray-500 hover:text-[#FFC000] transition">
         <i class="fas fa-arrow-left mr-1"></i>Back to Assessments
       </a>
       <span class="text-gray-300 mx-2">|</span>
-      <a href="/courses/{{ assessment.course_id }}" class="text-sm text-gray-500 hover:text-[#C9912B] transition">
+      <a href="/courses/{{ assessment.course_id }}" class="text-sm text-gray-500 hover:text-[#FFC000] transition">
         <i class="fas fa-book mr-1"></i>View Course
       </a>
     </div>
     {% if user.role == 'learner' %}
     <a href="/assessments/{{ assessment.id }}/take"
-       class="bg-[#C9912B] hover:bg-[#b07d26] text-white px-6 py-2.5 rounded-lg text-sm font-medium transition inline-flex items-center">
+       class="bg-[#FFC000] hover:bg-[#b07d26] text-white px-6 py-2.5 rounded-lg text-sm font-medium transition inline-flex items-center">
       <i class="fas fa-pencil-alt mr-2"></i>Take Assessment
+    </a>
+    {% endif %}
+    {% if user.role in ('superadmin', 'trainer') %}
+    <a href="/assessments/marking?assessment_id={{ assessment.id }}"
+       class="bg-[#540032] hover:bg-[#0f1d33] text-white px-6 py-2.5 rounded-lg text-sm font-medium transition inline-flex items-center">
+      <i class="fas fa-check-double mr-2"></i>View Marking Queue
     </a>
     {% endif %}
   </div>
@@ -23,7 +29,7 @@
   <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-8">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
       <div>
-        <h1 class="text-2xl font-bold text-[#1A2B4A]">{{ assessment.title }}</h1>
+        <h1 class="text-2xl font-bold text-[#540032]">{{ assessment.title }}</h1>
         <p class="text-sm text-gray-500 mt-1">{{ assessment.course.title }}{% if assessment.module_id %} &middot; Module: {{ assessment.module.title }}{% endif %}</p>
       </div>
       <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 capitalize self-start">
@@ -34,19 +40,19 @@
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
       <div class="bg-gray-50 rounded-lg p-3">
         <span class="block text-gray-400 text-xs uppercase tracking-wider">Pass Mark</span>
-        <span class="font-semibold text-[#1A2B4A]">{{ assessment.pass_mark }}%</span>
+        <span class="font-semibold text-[#540032]">{{ assessment.pass_mark }}%</span>
       </div>
       <div class="bg-gray-50 rounded-lg p-3">
         <span class="block text-gray-400 text-xs uppercase tracking-wider">Max Attempts</span>
-        <span class="font-semibold text-[#1A2B4A]">{{ assessment.max_attempts }}</span>
+        <span class="font-semibold text-[#540032]">{{ assessment.max_attempts }}</span>
       </div>
       <div class="bg-gray-50 rounded-lg p-3">
         <span class="block text-gray-400 text-xs uppercase tracking-wider">Time Limit</span>
-        <span class="font-semibold text-[#1A2B4A]">{{ assessment.time_limit_mins ~ ' min' if assessment.time_limit_mins else 'No limit' }}</span>
+        <span class="font-semibold text-[#540032]">{{ assessment.time_limit_mins ~ ' min' if assessment.time_limit_mins else 'No limit' }}</span>
       </div>
       <div class="bg-gray-50 rounded-lg p-3">
         <span class="block text-gray-400 text-xs uppercase tracking-wider">Questions</span>
-        <span class="font-semibold text-[#1A2B4A]">{{ questions | length }}</span>
+        <span class="font-semibold text-[#540032]">{{ questions | length }}</span>
       </div>
     </div>
 
@@ -62,9 +68,9 @@
   {% if user.role in ('superadmin', 'trainer') %}
   <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-8">
     <div class="flex items-center justify-between mb-6">
-      <h2 class="text-lg font-bold text-[#1A2B4A]"><i class="fas fa-question-circle mr-2"></i>Questions</h2>
+      <h2 class="text-lg font-bold text-[#540032]"><i class="fas fa-question-circle mr-2"></i>Questions</h2>
       <button onclick="document.getElementById('addQuestionForm').classList.toggle('hidden')"
-              class="text-sm text-[#C9912B] hover:text-[#b07d26] font-medium transition">
+              class="text-sm text-[#FFC000] hover:text-[#b07d26] font-medium transition">
         <i class="fas fa-plus mr-1"></i>Add Question
       </button>
     </div>
@@ -75,13 +81,13 @@
       <div>
         <label for="question_text" class="block text-sm font-medium text-gray-700 mb-1">Question Text</label>
         <textarea name="question_text" id="question_text" rows="2" required aria-required="true"
-                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-[#C9912B] outline-none transition text-sm"></textarea>
+                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-[#FFC000] outline-none transition text-sm"></textarea>
       </div>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div>
           <label for="question_type" class="block text-sm font-medium text-gray-700 mb-1">Type</label>
           <select name="question_type" id="question_type"
-                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-[#C9912B] outline-none transition text-sm bg-white">
+                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-[#FFC000] outline-none transition text-sm bg-white">
             <option value="mcq">Multiple Choice</option>
             <option value="written">Written</option>
             <option value="short_answer">Short Answer</option>
@@ -90,17 +96,17 @@
         <div>
           <label for="marks" class="block text-sm font-medium text-gray-700 mb-1">Marks</label>
           <input type="number" name="marks" id="marks" value="1" min="1"
-                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-[#C9912B] outline-none transition text-sm">
+                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-[#FFC000] outline-none transition text-sm">
         </div>
         <div>
           <label for="order_index" class="block text-sm font-medium text-gray-700 mb-1">Order</label>
           <input type="number" name="order_index" id="order_index" value="{{ questions | length + 1 }}" min="0"
-                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-[#C9912B] outline-none transition text-sm">
+                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-[#FFC000] outline-none transition text-sm">
         </div>
         <div>
           <label for="syllabus_area_tag" class="block text-sm font-medium text-gray-700 mb-1">Syllabus Area</label>
           <input type="text" name="syllabus_area_tag" id="syllabus_area_tag" placeholder="e.g. APM, IRM"
-                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-[#C9912B] outline-none transition text-sm">
+                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-[#FFC000] outline-none transition text-sm">
         </div>
       </div>
       <div id="mcqOptions" class="space-y-3">
@@ -109,27 +115,27 @@
           <div>
             <label for="option_a" class="block text-xs text-gray-500 mb-1">Option A</label>
             <input type="text" name="option_a" id="option_a" placeholder="Option A text"
-                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none">
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FFC000] outline-none">
           </div>
           <div>
             <label for="option_b" class="block text-xs text-gray-500 mb-1">Option B</label>
             <input type="text" name="option_b" id="option_b" placeholder="Option B text"
-                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none">
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FFC000] outline-none">
           </div>
           <div>
             <label for="option_c" class="block text-xs text-gray-500 mb-1">Option C</label>
             <input type="text" name="option_c" id="option_c" placeholder="Option C text"
-                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none">
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FFC000] outline-none">
           </div>
           <div>
             <label for="option_d" class="block text-xs text-gray-500 mb-1">Option D</label>
             <input type="text" name="option_d" id="option_d" placeholder="Option D text"
-                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none">
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FFC000] outline-none">
           </div>
         </div>
         <div>
           <label for="correct_answer" class="block text-sm font-medium text-gray-700 mb-1">Correct Answer</label>
-          <select name="correct_answer" id="correct_answer" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none bg-white">
+          <select name="correct_answer" id="correct_answer" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FFC000] outline-none bg-white">
             <option value="">Select correct answer</option>
             <option value="A">A</option>
             <option value="B">B</option>
@@ -157,7 +163,7 @@
       </script>
 
       <button type="submit"
-              class="px-4 py-2 bg-[#C9912B] hover:bg-[#b07d26] text-white text-sm font-medium rounded-lg transition">
+              class="px-4 py-2 bg-[#FFC000] hover:bg-[#b07d26] text-white text-sm font-medium rounded-lg transition">
         <i class="fas fa-plus mr-1"></i>Add Question
       </button>
     </form>
@@ -169,7 +175,7 @@
         <div class="flex items-start justify-between gap-4">
           <div class="flex-1">
             <div class="flex items-center gap-2 mb-2">
-              <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#1A2B4A] text-white text-xs font-bold">{{ q.order_index }}</span>
+              <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#540032] text-white text-xs font-bold">{{ q.order_index }}</span>
               <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
                 {% if q.question_type == 'mcq' %}bg-blue-50 text-blue-700
                 {% elif q.question_type == 'written' %}bg-green-50 text-green-700
@@ -197,7 +203,7 @@
           </div>
           <div class="flex items-center gap-2 flex-shrink-0">
             <button onclick="document.getElementById('edit-q-{{ q.id }}').classList.toggle('hidden')"
-                    class="text-gray-300 hover:text-[#C9912B] transition" title="Edit" aria-label="Edit">
+                    class="text-gray-300 hover:text-[#FFC000] transition" title="Edit" aria-label="Edit">
               <i class="fas fa-edit"></i>
             </button>
             <form method="POST" action="/assessments/questions/{{ q.id }}/delete" class="inline" data-confirm="Are you sure you want to delete this question? This cannot be undone.">
@@ -214,13 +220,13 @@
           <div>
             <label for="edit-question-text-{{ q.id }}" class="block text-sm font-medium text-gray-700 mb-1">Question Text</label>
             <textarea name="question_text" id="edit-question-text-{{ q.id }}" rows="2" required aria-required="true"
-                      class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none">{{ q.question_text }}</textarea>
+                      class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FFC000] outline-none">{{ q.question_text }}</textarea>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div>
               <label for="edit-question-type-{{ q.id }}" class="block text-sm font-medium text-gray-700 mb-1">Type</label>
               <select name="question_type" id="edit-question-type-{{ q.id }}" onchange="toggleEditMcq({{ q.id }}, this)"
-                      class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none bg-white">
+                      class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FFC000] outline-none bg-white">
                 <option value="mcq" {% if q.question_type == 'mcq' %}selected{% endif %}>Multiple Choice</option>
                 <option value="written" {% if q.question_type == 'written' %}selected{% endif %}>Written</option>
                 <option value="short_answer" {% if q.question_type == 'short_answer' %}selected{% endif %}>Short Answer</option>
@@ -229,17 +235,17 @@
             <div>
               <label for="edit-marks-{{ q.id }}" class="block text-sm font-medium text-gray-700 mb-1">Marks</label>
               <input type="number" name="marks" id="edit-marks-{{ q.id }}" value="{{ q.marks }}" min="1"
-                     class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none">
+                     class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FFC000] outline-none">
             </div>
             <div>
               <label for="edit-order-{{ q.id }}" class="block text-sm font-medium text-gray-700 mb-1">Order</label>
               <input type="number" name="order_index" id="edit-order-{{ q.id }}" value="{{ q.order_index }}" min="0"
-                     class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none">
+                     class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FFC000] outline-none">
             </div>
             <div>
               <label for="edit-syllabus-{{ q.id }}" class="block text-sm font-medium text-gray-700 mb-1">Syllabus Area</label>
               <input type="text" name="syllabus_area_tag" id="edit-syllabus-{{ q.id }}" value="{{ q.syllabus_area_tag or '' }}" placeholder="e.g. APM, IRM"
-                     class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none">
+                     class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FFC000] outline-none">
             </div>
           </div>
           <div id="edit-mcq-{{ q.id }}" class="space-y-3 {% if q.question_type != 'mcq' %}hidden{% endif %}">
@@ -252,27 +258,27 @@
               <div>
                 <label for="edit-opt-a-{{ q.id }}" class="block text-xs text-gray-500 mb-1">Option A</label>
                 <input type="text" name="option_a" id="edit-opt-a-{{ q.id }}" value="{{ opt_a.option_text if opt_a else '' }}" placeholder="Option A text"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none">
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FFC000] outline-none">
               </div>
               <div>
                 <label for="edit-opt-b-{{ q.id }}" class="block text-xs text-gray-500 mb-1">Option B</label>
                 <input type="text" name="option_b" id="edit-opt-b-{{ q.id }}" value="{{ opt_b.option_text if opt_b else '' }}" placeholder="Option B text"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none">
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FFC000] outline-none">
               </div>
               <div>
                 <label for="edit-opt-c-{{ q.id }}" class="block text-xs text-gray-500 mb-1">Option C</label>
                 <input type="text" name="option_c" id="edit-opt-c-{{ q.id }}" value="{{ opt_c.option_text if opt_c else '' }}" placeholder="Option C text"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none">
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FFC000] outline-none">
               </div>
               <div>
                 <label for="edit-opt-d-{{ q.id }}" class="block text-xs text-gray-500 mb-1">Option D</label>
                 <input type="text" name="option_d" id="edit-opt-d-{{ q.id }}" value="{{ opt_d.option_text if opt_d else '' }}" placeholder="Option D text"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none">
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FFC000] outline-none">
               </div>
             </div>
             <div>
               <label for="edit-correct-answer-{{ q.id }}" class="block text-sm font-medium text-gray-700 mb-1">Correct Answer</label>
-              <select name="correct_answer" id="edit-correct-answer-{{ q.id }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#C9912B] outline-none bg-white">
+              <select name="correct_answer" id="edit-correct-answer-{{ q.id }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FFC000] outline-none bg-white">
                 <option value="">Select correct answer</option>
                 <option value="A" {% if opt_a and opt_a.is_correct %}selected{% endif %}>A</option>
                 <option value="B" {% if opt_b and opt_b.is_correct %}selected{% endif %}>B</option>
@@ -283,7 +289,7 @@
           </div>
           <div class="flex items-center gap-2">
             <button type="submit"
-                    class="px-4 py-2 bg-[#C9912B] hover:bg-[#b07d26] text-white text-sm font-medium rounded-lg transition">
+                    class="px-4 py-2 bg-[#FFC000] hover:bg-[#b07d26] text-white text-sm font-medium rounded-lg transition">
               <i class="fas fa-save mr-1"></i>Save
             </button>
             <button type="button" onclick="document.getElementById('edit-q-{{ q.id }}').classList.add('hidden')"
@@ -303,8 +309,64 @@
     {% endif %}
   </div>
 
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-8">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-lg font-bold text-[#540032]"><i class="fas fa-import mr-2"></i>Import from Question Bank</h2>
+      <button onclick="document.getElementById('importPanel').classList.toggle('hidden')" class="text-sm text-[#FFC000] hover:text-[#b07d26] font-medium transition">
+        <i class="fas fa-chevron-down mr-1"></i>Toggle
+      </button>
+    </div>
+    <div id="importPanel" class="hidden">
+      <form method="GET" action="/assessments/{{ assessment.id }}" class="flex flex-wrap items-end gap-3 mb-4 p-4 bg-gray-50 rounded-lg">
+        <input type="hidden" name="import_filter" value="1">
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Course Code Tag</label>
+          <input type="text" name="course_code_tag" value="{{ request.query_params.get('course_code_tag', '') }}" class="border border-gray-300 rounded px-3 py-1.5 text-sm" placeholder="e.g. PLP101">
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Syllabus Area</label>
+          <input type="text" name="syllabus_area_tag" value="{{ request.query_params.get('syllabus_area_tag', '') }}" class="border border-gray-300 rounded px-3 py-1.5 text-sm" placeholder="e.g. APM">
+        </div>
+        <button type="submit" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-1.5 rounded text-sm transition"><i class="fas fa-search mr-1"></i> Search Bank</button>
+      </form>
+      {% if bank_questions %}
+      <form method="POST" action="/assessments/{{ assessment.id }}/import-from-bank" onsubmit="return confirm('Import selected questions into this assessment?')">
+        <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+        <div class="space-y-2 max-h-80 overflow-y-auto border rounded-lg p-3">
+          {% for bq in bank_questions %}
+          <label class="flex items-start gap-3 p-2 rounded hover:bg-gray-50 cursor-pointer">
+            <input type="checkbox" name="question_ids" value="{{ bq.id }}" class="mt-1">
+            <div>
+              <div class="flex items-center gap-2 text-xs text-gray-500">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {% if bq.question_type == 'mcq' %}bg-blue-50 text-blue-700{% elif bq.question_type == 'written' %}bg-green-50 text-green-700{% else %}bg-yellow-50 text-yellow-700{% endif %}">{{ bq.question_type }}</span>
+                <span>{{ bq.marks }} mark{{ 's' if bq.marks != 1 }}</span>
+                {% if bq.course_code_tag %}<span class="bg-gray-100 px-1.5 py-0.5 rounded">{{ bq.course_code_tag }}</span>{% endif %}
+                {% if bq.syllabus_area_tag %}<span class="bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded">{{ bq.syllabus_area_tag }}</span>{% endif %}
+              </div>
+              <p class="text-sm text-gray-800 mt-1">{{ bq.question_text }}</p>
+              {% if bq.bank_options %}
+              <div class="mt-1 flex flex-wrap gap-2 text-xs text-gray-500">
+                {% for opt in bq.bank_options %}
+                <span class="{% if opt.is_correct %}text-green-600 font-medium{% endif %}">{{ opt.option_label }}. {{ opt.option_text }}</span>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+          </label>
+          {% endfor %}
+        </div>
+        <button type="submit" class="mt-3 bg-[#FFC000] hover:bg-[#b07d26] text-white px-4 py-2 rounded text-sm font-medium transition"><i class="fas fa-download mr-1"></i> Import Selected</button>
+      </form>
+      {% elif request.query_params.get('import_filter') %}
+      <p class="text-sm text-gray-500 text-center py-4">No matching questions found in the bank.</p>
+      {% else %}
+      <p class="text-sm text-gray-500 text-center py-4">Use the filters above to search the question bank.</p>
+      {% endif %}
+    </div>
+  </div>
+
   <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8">
-    <h2 class="text-lg font-bold text-[#1A2B4A] mb-6"><i class="fas fa-history mr-2"></i>Submissions</h2>
+    <h2 class="text-lg font-bold text-[#540032] mb-6"><i class="fas fa-history mr-2"></i>Submissions</h2>
     {% if submissions %}
     <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">

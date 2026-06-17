@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Approve Enrolment Request{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-6">
+    <h1 class="text-2xl font-bold mb-6" style="color: #540032;"><i class="fas fa-check-circle mr-2" style="color: #FFC000;"></i> Approve Enrolment Request</h1>
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="mb-4">
+            <p class="text-sm text-gray-500">Learner</p>
+            <p class="font-medium">{{ req.user.full_name }} ({{ req.user.email }})</p>
+        </div>
+        <div class="mb-4">
+            <p class="text-sm text-gray-500">Course</p>
+            <p class="font-medium">{{ req.course.title }}</p>
+        </div>
+        {% if req.message %}
+        <div class="mb-4">
+            <p class="text-sm text-gray-500">Message</p>
+            <p class="text-gray-700">{{ req.message }}</p>
+        </div>
+        {% endif %}
+        <form method="POST" action="/admin/enrolment-requests/{{ req.id }}/approve">
+            <input type="hidden" name="csrf_token" value="">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Select Cohort</label>
+                <select name="cohort_id" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" required>
+                    {% if cohorts %}
+                    <option value="">-- Auto-select first active cohort --</option>
+                    {% for cohort in cohorts %}
+                    <option value="{{ cohort.id }}">{{ cohort.name }} ({{ cohort.delivery_mode }}{% if cohort.start_date %} &middot; starts {{ cohort.start_date }}{% endif %})</option>
+                    {% endfor %}
+                    {% else %}
+                    <option value="">No active cohorts available</option>
+                    {% endif %}
+                </select>
+            </div>
+            {% if cohorts %}
+            <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded text-sm hover:bg-green-700 transition"><i class="fas fa-check mr-1"></i> Approve &amp; Enrol</button>
+            {% endif %}
+            <a href="/admin/enrolment-requests" class="ml-2 text-gray-500 text-sm hover:underline">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

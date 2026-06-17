@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% block title %}Question Bank{% endblock %}
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold" style="color: #540032;"><i class="fas fa-database mr-2" style="color: #FFC000;"></i> Question Bank</h1>
+        <button onclick="document.getElementById('addForm').classList.toggle('hidden')" class="bg-[#FFC000] hover:bg-[#b07d26] text-white px-4 py-2 rounded text-sm font-medium transition"><i class="fas fa-plus mr-1"></i> Add Question</button>
+    </div>
+
+    {% if success %}<div class="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded mb-4 text-sm">{{ success }}</div>{% endif %}
+    {% if error %}<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4 text-sm">{{ error }}</div>{% endif %}
+
+    <div class="bg-white rounded-lg shadow p-4 mb-6">
+        <form method="GET" action="/question-bank" class="flex flex-wrap items-end gap-3">
+            <div>
+                <label class="block text-xs text-gray-500 mb-1">Course Code</label>
+                <select name="course_code_tag" class="border border-gray-300 rounded px-3 py-1.5 text-sm">
+                    <option value="">All</option>
+                    {% for tag in course_tags %}
+                    <option value="{{ tag }}" {% if course_code_tag == tag %}selected{% endif %}>{{ tag }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs text-gray-500 mb-1">Syllabus Area</label>
+                <select name="syllabus_area_tag" class="border border-gray-300 rounded px-3 py-1.5 text-sm">
+                    <option value="">All</option>
+                    {% for tag in syllabus_tags %}
+                    <option value="{{ tag }}" {% if syllabus_area_tag == tag %}selected{% endif %}>{{ tag }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-1.5 rounded text-sm transition"><i class="fas fa-filter mr-1"></i>Filter</button>
+            <a href="/question-bank" class="text-gray-500 text-sm hover:underline">Clear</a>
+        </form>
+    </div>
+
+    <form id="addForm" method="POST" action="/question-bank/create" class="hidden bg-white rounded-lg shadow p-6 mb-6 space-y-4">
+        <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+        <h2 class="text-lg font-semibold" style="color: #540032;">New Bank Question</h2>
+        <div>
+            <textarea name="question_text" rows="2" required class="w-full border border-gray-300 rounded px-4 py-2 text-sm focus:ring-2 focus:ring-[#FFC000] outline-none" placeholder="Question text"></textarea>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-xs text-gray-500 mb-1">Type</label>
+                <select name="question_type" class="w-full border border-gray-300 rounded px-3 py-2 text-sm bg-white" onchange="document.getElementById('newMcq').classList.toggle('hidden', this.value !== 'mcq')">
+                    <option value="mcq">Multiple Choice</option>
+                    <option value="written">Written</option>
+                    <option value="short_answer">Short Answer</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs text-gray-500 mb-1">Marks</label>
+                <input type="number" name="marks" value="1" min="1" class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+            </div>
+            <div>
+                <label class="block text-xs text-gray-500 mb-1">Course Code</label>
+                <input type="text" name="course_code_tag" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="e.g. PLP101">
+            </div>
+            <div>
+                <label class="block text-xs text-gray-500 mb-1">Syllabus Area</label>
+                <input type="text" name="syllabus_area_tag" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="e.g. APM">
+            </div>
+        </div>
+        <div id="newMcq" class="space-y-3">
+            <p class="text-sm font-medium text-gray-700">Answer Options</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {% for label in ['A', 'B', 'C', 'D'] %}
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Option {{ label }}</label>
+                    <input type="text" name="option_{{ label|lower }}" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Option {{ label }}">
+                </div>
+                {% endfor %}
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Correct Answer</label>
+                <select name="correct_answer" class="w-full border border-gray-300 rounded px-3 py-2 text-sm bg-white">
+                    <option value="">Select</option>
+                    {% for label in ['A', 'B', 'C', 'D'] %}
+                    <option value="{{ label }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <button type="submit" class="bg-[#FFC000] hover:bg-[#b07d26] text-white px-4 py-2 rounded text-sm font-medium transition"><i class="fas fa-save mr-1"></i> Save to Bank</button>
+    </form>
+
+    {% if questions %}
+    <div class="space-y-4">
+        {% for q in questions %}
+        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-[#FFC000]">
+            <div class="flex items-start justify-between gap-4">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {% if q.question_type == 'mcq' %}bg-blue-50 text-blue-700{% elif q.question_type == 'written' %}bg-green-50 text-green-700{% else %}bg-yellow-50 text-yellow-700{% endif %}">{{ q.question_type }}</span>
+                        <span class="text-xs text-gray-400">{{ q.marks }} mark{{ 's' if q.marks != 1 }}</span>
+                        {% if q.course_code_tag %}<span class="text-xs bg-gray-100 px-2 py-0.5 rounded">{{ q.course_code_tag }}</span>{% endif %}
+                        {% if q.syllabus_area_tag %}<span class="text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded">{{ q.syllabus_area_tag }}</span>{% endif %}
+                    </div>
+                    <p class="text-sm text-gray-800">{{ q.question_text }}</p>
+                    {% if q.bank_options %}
+                    <div class="mt-2 space-y-1">
+                        {% for opt in q.bank_options %}
+                        <div class="flex items-center gap-2 text-xs {% if opt.is_correct %}text-green-600 font-medium{% else %}text-gray-500{% endif %}">
+                            {% if opt.is_correct %}<i class="fas fa-check-circle text-green-500"></i>{% else %}<i class="far fa-circle text-gray-300"></i>{% endif %}
+                            <span>{{ opt.option_label }}. {{ opt.option_text }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <button onclick="document.getElementById('edit-{{ q.id }}').classList.toggle('hidden')" class="text-gray-400 hover:text-[#FFC000] transition" title="Edit"><i class="fas fa-edit"></i></button>
+                    <form method="POST" action="/question-bank/{{ q.id }}/delete" class="inline" onsubmit="return confirm('Remove this question from the bank?')">
+                        <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+                        <button type="submit" class="text-gray-400 hover:text-red-500 transition" title="Delete"><i class="far fa-trash-alt"></i></button>
+                    </form>
+                </div>
+            </div>
+
+            <form id="edit-{{ q.id }}" method="POST" action="/question-bank/{{ q.id }}/edit" class="hidden mt-4 pt-4 border-t space-y-4">
+                <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+                <div>
+                    <textarea name="question_text" rows="2" required class="w-full border border-gray-300 rounded px-4 py-2 text-sm focus:ring-2 focus:ring-[#FFC000] outline-none">{{ q.question_text }}</textarea>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div>
+                        <select name="question_type" class="w-full border border-gray-300 rounded px-3 py-2 text-sm bg-white" onchange="document.getElementById('editMcq-{{ q.id }}').classList.toggle('hidden', this.value !== 'mcq')">
+                            <option value="mcq" {% if q.question_type == 'mcq' %}selected{% endif %}>Multiple Choice</option>
+                            <option value="written" {% if q.question_type == 'written' %}selected{% endif %}>Written</option>
+                            <option value="short_answer" {% if q.question_type == 'short_answer' %}selected{% endif %}>Short Answer</option>
+                        </select>
+                    </div>
+                    <div>
+                        <input type="number" name="marks" value="{{ q.marks }}" min="1" class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <input type="text" name="course_code_tag" value="{{ q.course_code_tag or '' }}" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Course code">
+                    </div>
+                    <div>
+                        <input type="text" name="syllabus_area_tag" value="{{ q.syllabus_area_tag or '' }}" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Syllabus area">
+                    </div>
+                </div>
+                <div id="editMcq-{{ q.id }}" class="space-y-3 {% if q.question_type != 'mcq' %}hidden{% endif %}">
+                    <p class="text-sm font-medium text-gray-700">Answer Options</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {% for label in ['A', 'B', 'C', 'D'] %}
+                        {% set opt = q.bank_options | selectattr('option_label', 'equalto', label) | first %}
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1">Option {{ label }}</label>
+                            <input type="text" name="option_{{ label|lower }}" value="{{ opt.option_text if opt else '' }}" class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Correct Answer</label>
+                        <select name="correct_answer" class="w-full border border-gray-300 rounded px-3 py-2 text-sm bg-white">
+                            <option value="">Select</option>
+                            {% for label in ['A', 'B', 'C', 'D'] %}
+                            <option value="{{ label }}" {% if q.bank_options | selectattr('option_label', 'equalto', label) | selectattr('is_correct') | list %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="bg-[#FFC000] hover:bg-[#b07d26] text-white px-4 py-2 rounded text-sm font-medium transition"><i class="fas fa-save mr-1"></i> Save</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-12 text-gray-400 bg-white rounded-lg shadow">
+        <i class="fas fa-database text-4xl mb-3 block"></i>
+        <p class="text-sm">No questions in the bank yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    var sel = document.querySelector('select[name="question_type"]');
+    if (sel) {
+        sel.addEventListener('change', function() {
+            document.getElementById('newMcq').classList.toggle('hidden', this.value !== 'mcq');
+        });
+    }
+})();
+</script>
+{% endblock %}

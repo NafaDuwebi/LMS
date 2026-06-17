@@ -1,10 +1,14 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Date, Float
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Date, Float, Index, text, ForeignKey
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from database import Base
 
 
 class User(Base):
     __tablename__ = "users"
+    __table_args__ = (
+        Index("uq_users_email_ci", text("LOWER(email)"), unique=True),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(100), unique=True, index=True, nullable=False)
@@ -15,6 +19,7 @@ class User(Base):
     organisation = Column(String(255), nullable=True)
     job_title = Column(String(255), nullable=True)
     phone = Column(String(50), nullable=True)
+    department_id = Column(Integer, ForeignKey("departments.id", ondelete="SET NULL"), nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     last_login = Column(DateTime, nullable=True)
     is_active = Column(Boolean, default=True)
@@ -29,5 +34,7 @@ class User(Base):
     requires_gdpr_consent = Column(Boolean, default=False)
     failed_login_attempts = Column(Integer, default=0)
     locked_until = Column(DateTime, nullable=True)
-    notification_preferences = Column(String(50), default="all")
+    notification_preferences = Column(Text, default="{}")
     token_version = Column(Integer, default=0)
+
+    department = relationship("Department", foreign_keys=[department_id], lazy="joined")

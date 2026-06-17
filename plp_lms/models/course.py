@@ -18,7 +18,8 @@ class Course(Base):
     assessment_type = Column(String(50), nullable=True)
     delivery_mode = Column(String(50), nullable=True)
     cert_validity_years = Column(Integer, default=0)
-    is_published = Column(Boolean, default=True)
+    is_published = Column(Boolean, default=False)
+    status = Column(String(20), default="draft")
     prerequisites = Column(JSON, nullable=True)
     credit_value = Column(Integer, nullable=True)
     created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
@@ -57,7 +58,7 @@ class Module(Base):
     created_at = Column(DateTime, server_default=func.now())
 
     course = relationship("Course", back_populates="modules")
-    materials = relationship("Material", back_populates="module", cascade="all, delete-orphan")
+    materials = relationship("Material", back_populates="module", cascade="all, delete-orphan", order_by="Material.id")
 
 
 class Material(Base):

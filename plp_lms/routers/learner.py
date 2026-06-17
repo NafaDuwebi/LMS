@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request, Depends, Form, HTTPException
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session, joinedload
 from database import get_db
@@ -12,8 +12,9 @@ from models.training_record import TrainingRecord
 from services.auth_service import get_current_user, hash_password, verify_password, validate_password_strength
 from services.progress_service import get_learner_progress
 from services.notification_service import create_notification
-from datetime import datetime
+from datetime import datetime, date
 from services.flash import flash
+from config import ORG_NAME
 
 router = APIRouter(prefix="/learner", tags=["learner"], dependencies=[Depends(get_current_user)])
 from template_utils import templates
@@ -61,7 +62,12 @@ def view_course(request: Request, course_id: int, user: User = Depends(get_curre
 
 @router.get("/profile", response_class=HTMLResponse, name="learner.profile")
 def profile_page(request: Request, user: User = Depends(get_current_user)):
-    return templates.TemplateResponse("learner/profile.html", {"request": request, "user": user})
+    import json
+    try:
+        prefs = json.loads(user.notification_preferences) if user.notification_preferences else {}
+    except (json.JSONDecodeError, TypeError):
+        prefs = {}
+    return templates.TemplateResponse("learner/profile.html", {"request": request, "user": user, "prefs": prefs})
 
 
 @router.post("/profile", name="learner.profile_update")
@@ -107,6 +113,30 @@ def change_password(
     return templates.TemplateResponse("learner/profile.html", {"request": request, "user": db_user, "success": "Password changed"})
 
 
+@router.post("/profile/preferences", name="learner.profile_preferences")
+def update_preferences(
+    request: Request,
+    email_on_result: str = Form(""),
+    email_on_certificate: str = Form(""),
+    email_on_enrolment: str = Form(""),
+    csrf_token: str = Form(default=""),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    import json
+    db_user = db.query(User).filter(User.id == user.id).first()
+    if db_user:
+        prefs = {
+            "email_on_result": email_on_result == "yes",
+            "email_on_certificate": email_on_certificate == "yes",
+            "email_on_enrolment": email_on_enrolment == "yes",
+        }
+        db_user.notification_preferences = json.dumps(prefs)
+        db.commit()
+    flash(request, "Notification preferences updated", "success")
+    return RedirectResponse(url="/learner/profile", status_code=302)
+
+
 @router.post("/request-deletion", name="learner.request_deletion")
 def request_deletion(
     request: Request,
@@ -143,6 +173,116 @@ def training_record(request: Request, success: str = None, error: str = None, us
         "certificates": certs, "external": external,
         "edit_record": None, "success": success, "error": error,
     })
+
+
+@router.get("/training-record/download", name="learner.training_record_download")
+def download_training_record(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    from io import BytesIO
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.units import mm
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.colors import HexColor
+
+    enrolments = db.query(Enrolment).filter(
+        Enrolment.user_id == user.id, Enrolment.status == "completed"
+    ).all()
+    certs = db.query(Certificate).filter(
+        Certificate.user_id == user.id, Certificate.revoked == False
+    ).all()
+    external = db.query(TrainingRecord).filter(
+        TrainingRecord.user_id == user.id
+    ).all()
+
+    buf = BytesIO()
+    pdf = canvas.Canvas(buf, pagesize=A4)
+    width, height = A4
+    y = height - 20 * mm
+    primary = HexColor("#1A2B4A")
+    accent = HexColor("#C9912B")
+
+    pdf.setFont("Helvetica-Bold", 18)
+    pdf.setFillColor(primary)
+    pdf.drawString(20 * mm, y, "Training Transcript")
+    y -= 8 * mm
+
+    pdf.setFont("Helvetica", 11)
+    pdf.setFillColor(HexColor("#333333"))
+    pdf.drawString(20 * mm, y, f"Learner: {user.full_name}")
+    y -= 5 * mm
+    pdf.drawString(20 * mm, y, f"Organisation: {ORG_NAME}")
+    y -= 5 * mm
+    pdf.drawString(20 * mm, y, f"Generated: {date.today().strftime('%d %B %Y')}")
+    y -= 12 * mm
+
+    def section_header(text):
+        nonlocal y
+        pdf.setFont("Helvetica-Bold", 13)
+        pdf.setFillColor(primary)
+        pdf.drawString(20 * mm, y, text)
+        y -= 7 * mm
+        pdf.setStrokeColor(accent)
+        pdf.setLineWidth(0.5)
+        pdf.line(20 * mm, y, width - 20 * mm, y)
+        y -= 5 * mm
+
+    def table_row(cols, widths, bold=False):
+        nonlocal y
+        pdf.setFont("Helvetica-Bold" if bold else "Helvetica", 9)
+        pdf.setFillColor(HexColor("#1A2B4A") if bold else HexColor("#333333"))
+        x = 20 * mm
+        for i, text in enumerate(cols):
+            pdf.drawString(x, y, str(text))
+            x += widths[i]
+        y -= 4.5 * mm
+
+    # Completed courses
+    section_header("Completed Courses")
+    col_w = [50 * mm, 40 * mm, 25 * mm, 30 * mm]
+    table_row(["Course", "Cohort", "Score", "Completed"], col_w, bold=True)
+    y -= 1 * mm
+    for en in enrolments:
+        ctitle = en.cohort.course.title if en.cohort and en.cohort.course else ""
+        cname = en.cohort.name if en.cohort else ""
+        cdate = en.completion_date.strftime("%d %b %Y") if en.completion_date else ""
+        table_row([ctitle, cname, f"{en.final_score}%" if en.final_score else "", cdate], col_w)
+        y -= 2 * mm
+        if y < 30 * mm:
+            pdf.showPage()
+            y = height - 20 * mm
+    y -= 6 * mm
+
+    # External training
+    section_header("External Training")
+    col_w2 = [40 * mm, 35 * mm, 18 * mm, 30 * mm]
+    table_row(["Title", "Provider", "Hours", "Completed"], col_w2, bold=True)
+    y -= 1 * mm
+    for t in external:
+        cdate = t.completion_date.strftime("%d %b %Y") if t.completion_date else ""
+        table_row([t.title, t.provider or "", str(t.hours or ""), cdate], col_w2)
+        y -= 2 * mm
+        if y < 30 * mm:
+            pdf.showPage()
+            y = height - 20 * mm
+    y -= 6 * mm
+
+    # Active certificates
+    section_header("Active Certificates")
+    col_w3 = [45 * mm, 40 * mm, 25 * mm, 25 * mm]
+    table_row(["Certificate #", "Course", "Issued", "Expiry"], col_w3, bold=True)
+    y -= 1 * mm
+    for c in certs:
+        issued = c.issued_at.strftime("%d %b %Y") if c.issued_at else ""
+        expiry = c.expiry_date.strftime("%d %b %Y") if c.expiry_date else "N/A"
+        table_row([c.certificate_number, c.course.title if c.course else "", issued, expiry], col_w3)
+        y -= 2 * mm
+        if y < 30 * mm:
+            pdf.showPage()
+            y = height - 20 * mm
+
+    pdf.save()
+    buf.seek(0)
+    filename = f"training_transcript_{user.username}_{date.today()}.pdf"
+    return FileResponse(buf, media_type="application/pdf", filename=filename, headers={"Content-Disposition": f"attachment; filename={filename}"})
 
 
 @router.post("/training-record/add", name="learner.add_external_training")

@@ -3,7 +3,7 @@
 {% block content %}
 <div class="space-y-6">
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-[#1A2B4A]">Pending Submissions</h1>
+        <h1 class="text-2xl font-bold text-[#540032]">Pending Submissions</h1>
         <span class="text-sm text-gray-500">{{ submissions|length }} pending</span>
     </div>
 
@@ -11,7 +11,7 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="bg-[#1A2B4A] text-white text-left">
+                    <tr class="bg-[#540032] text-white text-left">
                         <th scope="col" class="px-6 py-3 font-medium">Learner</th>
                         <th scope="col" class="px-6 py-3 font-medium">Assessment</th>
                         <th scope="col" class="px-6 py-3 font-medium">Submitted</th>
@@ -22,14 +22,14 @@
                 <tbody class="divide-y divide-gray-200">
                     {% for submission in submissions %}
                     <tr class="hover:bg-gray-50 transition">
-                        <td class="px-6 py-4 text-[#1A2B4A] font-medium">{{ submission.user.full_name }}</td>
+                        <td class="px-6 py-4 text-[#540032] font-medium">{{ submission.user.full_name }}</td>
                         <td class="px-6 py-4 text-gray-600">{{ submission.assessment.title }}</td>
                         <td class="px-6 py-4 text-gray-600">{{ submission.submitted_at.strftime('%d %b %Y, %H:%M') if submission.submitted_at else '&mdash;'|safe }}</td>
                         <td class="px-6 py-4">
-                            <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#C9912B] text-white text-xs font-bold">{{ submission.attempt_number }}</span>
+                            <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#FFC000] text-white text-xs font-bold">{{ submission.attempt_number }}</span>
                         </td>
                         <td class="px-6 py-4">
-                            <a href="/assessments/marking/{{ submission.id }}" class="inline-flex items-center px-3 py-1.5 bg-[#C9912B] text-white rounded-lg text-xs font-medium hover:bg-[#b57d24] transition">
+                            <a href="/assessments/marking/{{ submission.id }}" class="inline-flex items-center px-3 py-1.5 bg-[#FFC000] text-white rounded-lg text-xs font-medium hover:bg-[#b57d24] transition">
                                 <i class="fas fa-check mr-1.5"></i>Mark
                             </a>
                         </td>

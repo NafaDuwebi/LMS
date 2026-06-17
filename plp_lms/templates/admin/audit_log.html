@@ -5,7 +5,33 @@
 {% block content %}
 <div class="max-w-6xl mx-auto">
     <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold text-[#1A2B4A]">Audit Log</h1>
+        <h1 class="text-2xl font-bold text-[#540032]"><i class="fas fa-clipboard-list mr-2" style="color: #FFC000;"></i> Audit Log</h1>
+        <a href="/admin/audit-log/export{% if action or date_from or date_to %}?{% if action %}action={{ action }}&{% endif %}{% if date_from %}date_from={{ date_from }}&{% endif %}{% if date_to %}date_to={{ date_to }}{% endif %}{% endif %}" class="bg-[#FFC000] hover:bg-[#b07d26] text-white px-4 py-2 rounded text-sm font-medium transition"><i class="fas fa-download mr-1"></i> Export CSV</a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+        <form method="GET" action="/admin/audit-log" class="flex flex-wrap items-end gap-3">
+            <div>
+                <label class="block text-xs text-gray-500 mb-1">Action Type</label>
+                <select name="action" class="border border-gray-300 rounded px-3 py-1.5 text-sm">
+                    <option value="">All</option>
+                    {% for at in action_types %}
+                    <option value="{{ at }}" {% if action == at %}selected{% endif %}>{{ at }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs text-gray-500 mb-1">From</label>
+                <input type="date" name="date_from" value="{{ date_from or '' }}" class="border border-gray-300 rounded px-3 py-1.5 text-sm">
+            </div>
+            <div>
+                <label class="block text-xs text-gray-500 mb-1">To</label>
+                <input type="date" name="date_to" value="{{ date_to or '' }}" class="border border-gray-300 rounded px-3 py-1.5 text-sm">
+            </div>
+            <button type="submit" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-1.5 rounded text-sm transition"><i class="fas fa-filter mr-1"></i> Filter</button>
+            <a href="/admin/audit-log" class="text-gray-500 text-sm hover:underline">Clear</a>
+            <span class="text-xs text-gray-400 ml-auto">{{ total }} entries</span>
+        </form>
     </div>
 
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -55,5 +81,17 @@
             </table>
         </div>
     </div>
+
+    {% if total_pages > 1 %}
+    <div class="flex items-center justify-center gap-2 mt-6">
+        {% if page > 1 %}
+        <a href="/admin/audit-log?page={{ page - 1 }}&per_page={{ per_page }}{% if action %}&action={{ action }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="px-3 py-1.5 text-sm bg-white border rounded hover:bg-gray-50">&laquo; Prev</a>
+        {% endif %}
+        <span class="text-sm text-gray-500">Page {{ page }} of {{ total_pages }}</span>
+        {% if page < total_pages %}
+        <a href="/admin/audit-log?page={{ page + 1 }}&per_page={{ per_page }}{% if action %}&action={{ action }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="px-3 py-1.5 text-sm bg-white border rounded hover:bg-gray-50">Next &raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

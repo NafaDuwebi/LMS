@@ -3,29 +3,26 @@
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 py-6">
     <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold" style="color: #1A2B4A;">Attendance Register: {{ cohort.name }}</h1>
+        <h1 class="text-2xl font-bold" style="color: #540032;">Attendance Register: {{ cohort.name }}</h1>
         <div class="flex gap-3">
-            <button onclick="document.getElementById('addSessionModal').classList.remove('hidden')" class="px-4 py-2 rounded text-white text-sm font-medium hover:opacity-90" style="background-color: #C9912B;">Add Session Date</button>
-            <form method="POST" action="/attendance/{{ cohort.id }}/record">
-    <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
-                <input type="hidden" name="dummy_token" value="dummy">
-                <button type="submit" class="px-6 py-2 rounded text-white text-sm font-medium hover:opacity-90" style="background-color: #1A2B4A;">Save Attendance</button>
-            </form>
+            <button onclick="document.getElementById('addSessionModal').classList.remove('hidden')" class="px-4 py-2 rounded text-white text-sm font-medium hover:opacity-90" style="background-color: #FFC000;">Add Session Date</button>
+            <button type="submit" form="attendanceForm" class="px-6 py-2 rounded text-white text-sm font-medium hover:opacity-90" style="background-color: #540032;">Save Attendance</button>
         </div>
     </div>
 
     <div id="addSessionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 class="text-lg font-semibold mb-4" style="color: #1A2B4A;">Add Session Date</h3>
+            <h3 class="text-lg font-semibold mb-4" style="color: #540032;">Add Session Date</h3>
             <form method="POST" action="/attendance/{{ cohort.id }}/session">
+                <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
                 <input type="hidden" name="dummy_token" value="dummy">
                 <div class="mb-4">
                     <label for="session_date" class="block text-sm font-medium text-gray-700 mb-1">Session Date</label>
-                    <input type="date" name="session_date" id="session_date" required aria-required="true" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2" style="focus:ring-color: #C9912B;">
+                    <input type="date" name="session_date" id="session_date" required aria-required="true" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2" style="focus:ring-color: #FFC000;">
                 </div>
                 <div class="flex justify-end gap-3">
                     <button type="button" onclick="this.closest('#addSessionModal').classList.add('hidden')" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">Cancel</button>
-                    <button type="submit" class="px-4 py-2 rounded text-white text-sm font-medium hover:opacity-90" style="background-color: #C9912B;">Add</button>
+                    <button type="submit" class="px-4 py-2 rounded text-white text-sm font-medium hover:opacity-90" style="background-color: #FFC000;">Add</button>
                 </div>
             </form>
         </div>
@@ -33,6 +30,7 @@
 
     <div class="bg-white rounded-lg shadow overflow-x-auto">
         <form method="POST" action="/attendance/{{ cohort.id }}/record" id="attendanceForm">
+            <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
             <input type="hidden" name="dummy_token" value="dummy">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
@@ -58,9 +56,9 @@
                         {% set record = attendance_map.get(enrolment.id, {}).get(date) %}
                         <td class="px-4 py-3 text-center">
                             <div class="flex flex-col items-center gap-1">
-                                <input type="checkbox" name="attendance-{{ enrolment.id }}-{{ date }}" id="attendance-{{ enrolment.id }}-{{ date }}" value="present" {% if record and record.present %}checked{% endif %} class="h-4 w-4 rounded focus:ring-2" style="color: #C9912B; focus:ring-color: #C9912B;">
+                                <input type="checkbox" name="attendance-{{ enrolment.id }}-{{ date }}" id="attendance-{{ enrolment.id }}-{{ date }}" value="present" {% if record and record.attended %}checked{% endif %} class="h-4 w-4 rounded focus:ring-2" style="color: #FFC000; focus:ring-color: #FFC000;">
                                 <label for="attendance-{{ enrolment.id }}-{{ date }}" class="sr-only">Present for {{ enrolment.user.full_name }} on {{ date }}</label>
-                                <input type="text" name="notes-{{ enrolment.id }}-{{ date }}" id="notes-{{ enrolment.id }}-{{ date }}" value="{{ record.notes if record else '' }}" placeholder="Notes" class="w-24 text-xs border border-gray-200 rounded px-1 py-0.5 focus:outline-none focus:border-gray-400" aria-label="Notes for {{ enrolment.user.full_name }} on {{ date }}">
+                                <input type="text" name="notes-{{ enrolment.id }}-{{ date }}" id="notes-{{ enrolment.id }}-{{ date }}" value="{{ record.notes or '' }}" placeholder="Notes" class="w-24 text-xs border border-gray-200 rounded px-1 py-0.5 focus:outline-none focus:border-gray-400" aria-label="Notes for {{ enrolment.user.full_name }} on {{ date }}">
                             </div>
                         </td>
                         {% endfor %}
@@ -78,8 +76,9 @@
 
 <div id="deleteSessionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white rounded-lg p-6 w-full max-w-md">
-        <h3 class="text-lg font-semibold mb-4" style="color: #1A2B4A;">Delete Session</h3>
+        <h3 class="text-lg font-semibold mb-4" style="color: #540032;">Delete Session</h3>
         <form method="POST" action="/attendance/{{ cohort.id }}/session/delete">
+            <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
             <input type="hidden" name="dummy_token" value="dummy">
             <input type="hidden" name="session_date" id="deleteSessionDate" value="">
             <p class="text-gray-600 mb-4">Are you sure you want to delete this session and all its attendance records?</p>

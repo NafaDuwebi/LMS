@@ -1,7 +1,7 @@
 """add_missing_columns
 
 Revision ID: e35c1b869d1d
-Revises: 6b898415d407
+Revises: 5977a38ad86b
 Create Date: 2026-06-12 12:48:33.180265
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = 'e35c1b869d1d'
-down_revision: Union[str, Sequence[str], None] = '6b898415d407'
+down_revision: Union[str, Sequence[str], None] = '5977a38ad86b'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

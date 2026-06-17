@@ -3,9 +3,9 @@
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold text-[#1A2B4A]">Assessments</h1>
+    <h1 class="text-2xl font-bold text-[#540032]">Assessments</h1>
     {% if user.role in ('superadmin', 'trainer') %}
-    <a href="/assessments/create" class="bg-[#C9912B] hover:bg-[#b07d26] text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+    <a href="/assessments/create" class="bg-[#FFC000] hover:bg-[#b07d26] text-white px-4 py-2 rounded-lg text-sm font-medium transition">
       <i class="fas fa-plus mr-2"></i>New Assessment
     </a>
     {% endif %}
@@ -30,7 +30,7 @@
           {% for a in assessments %}
           <tr class="hover:bg-gray-50 transition">
             <td class="px-6 py-4 whitespace-nowrap">
-              <a href="/assessments/{{ a.id }}" class="text-sm font-medium text-[#1A2B4A] hover:text-[#C9912B] transition">
+              <a href="/assessments/{{ a.id }}" class="text-sm font-medium text-[#540032] hover:text-[#FFC000] transition">
                 {{ a.title }}
               </a>
             </td>
@@ -58,11 +58,11 @@
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
               <div class="flex items-center justify-end space-x-3">
-                <a href="/assessments/{{ a.id }}" class="text-[#1A2B4A] hover:text-[#C9912B] transition" title="View" aria-label="View">
+                <a href="/assessments/{{ a.id }}" class="text-[#540032] hover:text-[#FFC000] transition" title="View" aria-label="View">
                   <i class="far fa-eye"></i>
                 </a>
                   {% if user.role in ('superadmin', 'trainer') %}
-                  <a href="/assessments/{{ a.id }}/edit" class="text-[#1A2B4A] hover:text-[#C9912B] transition" title="Edit" aria-label="Edit">
+                  <a href="/assessments/{{ a.id }}/edit" class="text-[#540032] hover:text-[#FFC000] transition" title="Edit" aria-label="Edit">
                     <i class="far fa-edit"></i>
                   </a>
                   <form method="POST" action="/assessments/{{ a.id }}/delete" class="inline" data-confirm="Are you sure you want to delete &quot;{{ a.title | e }}&quot;? This cannot be undone.">
@@ -81,7 +81,7 @@
               <i class="fas fa-file-alt text-4xl mb-3 block"></i>
               <p class="text-sm">No assessments found.</p>
               {% if user.role in ('superadmin', 'trainer') %}
-              <a href="{{ '/assessments/create' }}" class="inline-block mt-3 text-sm text-[#C9912B] hover:text-[#b07d26] font-medium">
+              <a href="{{ '/assessments/create' }}" class="inline-block mt-3 text-sm text-[#FFC000] hover:text-[#b07d26] font-medium">
                 <i class="fas fa-plus mr-1"></i>Create one
               </a>
               {% endif %}

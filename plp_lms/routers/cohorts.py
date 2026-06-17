@@ -10,6 +10,7 @@ from services.auth_service import get_current_user, require_role, hash_password,
 from services.email_service import send_welcome_email
 from services.bulk_import_service import bulk_enrol_from_csv
 from services.notification_service import create_notification
+from services.audit_service import log_action
 from services.flash import flash
 from datetime import datetime, date, timedelta
 from config import DATA_RETENTION_YEARS
@@ -74,6 +75,7 @@ def create_cohort(
     )
     db.add(cohort)
     db.commit()
+    log_action(db, user.id, "create_cohort", "cohort", cohort.id, f"Created cohort {name} for course {course_id}")
     flash(request, "Cohort created", "success")
     return RedirectResponse(url=f"/cohorts/{cohort.id}", status_code=302)
 
@@ -157,6 +159,7 @@ def enrol_learner(
     request: Request,
     cohort_id: int,
     email: str = Form(...),
+    create_if_not_found: bool = Form(False),
     csrf_token: str = Form(default=""),
     db: Session = Depends(get_db),
     user: User = Depends(require_role("superadmin", "trainer")),
@@ -167,18 +170,24 @@ def enrol_learner(
 
     learner = db.query(User).filter(User.email == email).first()
     if not learner:
-        from config import BASE_URL
-        learner = User(
-            username=safe_username(db, email),
-            email=email,
-            password_hash=hash_password(secrets.token_urlsafe(16)),
-            full_name=email.split("@")[0],
-            role="learner",
-        )
-        db.add(learner)
-        db.flush()
-        token = create_setup_token(db, learner.id)
-        send_welcome_email(email, token, BASE_URL, learner.id, db)
+        if create_if_not_found and user.role == "superadmin":
+            import logging
+            logging.getLogger("plp_lms").warning("Creating user on the fly for enrolment: %s by %s", email, user.username)
+            from config import BASE_URL
+            learner = User(
+                username=safe_username(db, email),
+                email=email,
+                password_hash=hash_password(secrets.token_urlsafe(16)),
+                full_name=email.split("@")[0],
+                role="learner",
+            )
+            db.add(learner)
+            db.flush()
+            token = create_setup_token(db, learner.id)
+            send_welcome_email(email, token, BASE_URL, learner.id, db)
+        else:
+            flash(request, "No account found for this email address. Please check the email or ask the learner to register first.", "error")
+            return RedirectResponse(url=f"/cohorts/{cohort_id}?error=no_account", status_code=302)
 
     existing = db.query(Enrolment).filter(
         Enrolment.user_id == learner.id, Enrolment.cohort_id == cohort_id
@@ -190,6 +199,7 @@ def enrol_learner(
     en = Enrolment(user_id=learner.id, cohort_id=cohort_id, enrolment_source="admin")
     db.add(en)
     create_notification(db, learner.id, "enrolment", f"Enrolled in cohort {cohort.name}")
+    log_action(db, user.id, "enrol_learner", "enrolment", en.id, f"Enrolled learner {learner.email} in cohort {cohort.name} ({cohort_id})")
     db.commit()
     flash(request, "Learner enrolled", "success")
     return RedirectResponse(url=f"/cohorts/{cohort_id}?success=enrolled", status_code=302)

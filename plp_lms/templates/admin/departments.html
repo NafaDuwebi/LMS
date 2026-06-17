@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Departments - Admin{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-6">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold" style="color: #540032;"><i class="fas fa-building mr-2" style="color: #FFC000;"></i> Departments</h1>
+        <button onclick="document.getElementById('createForm').classList.toggle('hidden')" class="px-4 py-2 rounded text-sm font-semibold text-white" style="background-color: #FFC000;">
+            <i class="fas fa-plus mr-1"></i> New Department
+        </button>
+    </div>
+
+    <div id="createForm" class="hidden bg-white rounded-lg shadow-sm border p-4 mb-6">
+        <form method="POST" action="/admin/departments/create" class="flex items-end gap-3">
+            <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+            <div class="flex-1">
+                <label class="block text-xs font-medium text-gray-600 mb-1">Name</label>
+                <input type="text" name="name" required class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Parent</label>
+                <select name="parent_id" class="border border-gray-300 rounded px-3 py-2 text-sm">
+                    <option value="">None</option>
+                    {% for d in departments %}
+                    <option value="{{ d.id }}">{{ d.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Manager</label>
+                <select name="manager_id" class="border border-gray-300 rounded px-3 py-2 text-sm">
+                    <option value="">None</option>
+                    {% for m in managers %}
+                    <option value="{{ m.id }}">{{ m.full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="px-4 py-2 rounded text-sm font-semibold text-white" style="background-color: #540032;">Create</button>
+        </form>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="border-b" style="background-color: #540032; color: #fff;">
+                    <th class="px-4 py-3 text-left">Name</th>
+                    <th class="px-4 py-3 text-left">Parent</th>
+                    <th class="px-4 py-3 text-left">Manager</th>
+                    <th class="px-4 py-3 text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in departments %}
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium">{{ d.name }}</td>
+                    <td class="px-4 py-3 text-gray-600">{{ d.parent.name if d.parent else '-' }}</td>
+                    <td class="px-4 py-3 text-gray-600">{{ d.manager.full_name if d.manager else '-' }}</td>
+                    <td class="px-4 py-3 text-center">
+                        <button onclick="document.getElementById('editForm{{ d.id }}').classList.toggle('hidden')" class="text-xs px-2 py-1 rounded border hover:bg-gray-50" style="border-color: #FFC000; color: #FFC000;">Edit</button>
+                        <form method="POST" action="/admin/departments/{{ d.id }}/delete" data-confirm="Deactivate this department?" class="inline">
+                            <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+                            <button type="submit" class="text-xs px-2 py-1 rounded border border-red-300 text-red-600 hover:bg-red-50">Deactivate</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr id="editForm{{ d.id }}" class="hidden">
+                    <td colspan="4" class="px-4 py-3 bg-gray-50">
+                        <form method="POST" action="/admin/departments/{{ d.id }}/edit" class="flex items-end gap-3">
+                            <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+                            <div class="flex-1">
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Name</label>
+                                <input type="text" name="name" value="{{ d.name }}" required class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Parent</label>
+                                <select name="parent_id" class="border border-gray-300 rounded px-3 py-2 text-sm">
+                                    <option value="">None</option>
+                                    {% for p in departments %}
+                                    <option value="{{ p.id }}" {% if d.parent_id == p.id %}selected{% endif %}>{{ p.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Manager</label>
+                                <select name="manager_id" class="border border-gray-300 rounded px-3 py-2 text-sm">
+                                    <option value="">None</option>
+                                    {% for m in managers %}
+                                    <option value="{{ m.id }}" {% if d.manager_id == m.id %}selected{% endif %}>{{ m.full_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="submit" class="px-4 py-2 rounded text-sm font-semibold text-white" style="background-color: #540032;">Save</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" class="px-4 py-6 text-center text-gray-500">No departments yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

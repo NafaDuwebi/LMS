@@ -3,16 +3,16 @@
 {% block content %}
 <div class="max-w-2xl mx-auto px-4 py-12">
     <div class="text-center mb-8">
-        <i class="fas fa-shield-alt text-5xl mb-4" style="color: #1A2B4A;"></i>
-        <h1 class="text-3xl font-bold" style="color: #1A2B4A;">Certificate Verification</h1>
+        <i class="fas fa-shield-alt text-5xl mb-4" style="color: #540032;"></i>
+        <h1 class="text-3xl font-bold" style="color: #540032;">Certificate Verification</h1>
         <p class="text-gray-500 mt-2">Verify the authenticity of a PLP certificate</p>
     </div>
 
     <form method="GET" action="{{ '/certificates/verify' }}" class="bg-white rounded-lg shadow border border-gray-200 p-6 mb-8">
     <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
         <div class="flex gap-3">
-            <input type="text" name="certificate_number" id="certificate_number" value="{{ request.query_params.get('certificate_number', '') }}" placeholder="Enter certificate number" required aria-required="true" aria-label="Certificate number" class="flex-1 border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2" style="focus:ring-color: #C9912B;">
-            <button type="submit" class="px-6 py-2 rounded text-white font-medium hover:opacity-90" style="background-color: #C9912B;">
+            <input type="text" name="certificate_number" id="certificate_number" value="{{ request.query_params.get('certificate_number', '') }}" placeholder="Enter certificate number" required aria-required="true" aria-label="Certificate number" class="flex-1 border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2" style="focus:ring-color: #FFC000;">
+            <button type="submit" class="px-6 py-2 rounded text-white font-medium hover:opacity-90" style="background-color: #FFC000;">
                 <i class="fas fa-search mr-1"></i>Verify
             </button>
         </div>

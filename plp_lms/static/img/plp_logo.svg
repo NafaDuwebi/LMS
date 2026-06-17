@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 44" width="260" height="44" role="img" aria-label="PL Projects">
+  <title>PL Projects</title>
+
+  <!-- Three gold chevrons matching plprojects.co.uk logo -->
+  <!-- Chevron 1 (leftmost) -->
+  <polygon points="4,8 16,22 4,36 10,36 22,22 10,8" fill="#FFC000"/>
+  <!-- Chevron 2 (middle) -->
+  <polygon points="14,8 26,22 14,36 20,36 32,22 20,8" fill="#FFC000"/>
+  <!-- Chevron 3 (rightmost) -->
+  <polygon points="24,8 36,22 24,36 30,36 42,22 30,8" fill="#FFC000"/>
+
+  <!-- "PL Projects" white text — Inter/sans-serif bold, matching website -->
+  <text
+    x="50"
+    y="30"
+    font-family="Inter, Arial, sans-serif"
+    font-size="22"
+    font-weight="700"
+    fill="#FFFFFF"
+    letter-spacing="0.3"
+  >PL Projects</text>
+</svg>

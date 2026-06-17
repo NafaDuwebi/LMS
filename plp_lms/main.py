@@ -35,29 +35,71 @@ async def lifespan(app: FastAPI):
     os.makedirs(os.path.join(BASE_DIR, "uploads"), exist_ok=True)
     os.makedirs(os.path.join(BASE_DIR, "certificates"), exist_ok=True)
     os.makedirs(os.path.join(BASE_DIR, "exports"), exist_ok=True)
-    from services.scheduler_service import scheduler, deliver_reports_task, flag_retention_records
+    from services.scheduler_service import scheduler, deliver_reports_task, flag_retention_records, check_mandatory_training_reminders
     scheduler.start()
     scheduler.add_job(deliver_reports_task, 'cron', hour='*', minute='0')
     scheduler.add_job(flag_retention_records, 'cron', hour='2', minute='0')
+    scheduler.add_job(check_mandatory_training_reminders, 'cron', hour='9', minute='0')
     yield
 
+
+from services.exceptions import RedirectException, GDPRConsentRequired, PasswordChangeRequired
 
 app = FastAPI(title="PLP Learning Management System", lifespan=lifespan)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
+async def redirect_exception_handler(request: Request, exc: RedirectException):
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url=exc.url, status_code=exc.status_code)
+
+app.add_exception_handler(RedirectException, redirect_exception_handler)
+app.add_exception_handler(GDPRConsentRequired, redirect_exception_handler)
+app.add_exception_handler(PasswordChangeRequired, redirect_exception_handler)
+
+
+@app.exception_handler(403)
+async def forbidden_handler(request: Request, exc):
+    from template_utils import templates
+    return templates.TemplateResponse("errors/403.html", {"request": request, "message": str(exc.detail)}, status_code=403)
+
+
 @app.exception_handler(404)
 async def not_found_handler(request: Request, exc):
+    from fastapi.responses import HTMLResponse
     from template_utils import templates
-    return templates.TemplateResponse("base.html", {"request": request, "error": "Page not found"}, status_code=404)
+    return templates.TemplateResponse("errors/404.html", {"request": request}, status_code=404)
+
+
+@app.exception_handler(422)
+async def validation_error_handler(request: Request, exc):
+    from template_utils import templates
+    return templates.TemplateResponse("errors/422.html", {"request": request}, status_code=422)
+
+
+from fastapi.exceptions import RequestValidationError
+
+@app.exception_handler(RequestValidationError)
+async def request_validation_error_handler(request: Request, exc: RequestValidationError):
+    from template_utils import templates
+    return templates.TemplateResponse("errors/422.html", {"request": request}, status_code=422)
 
 
 @app.exception_handler(500)
 async def internal_error_handler(request: Request, exc):
     logger.exception("Internal server error: %s", exc)
+    from fastapi.responses import HTMLResponse
     from template_utils import templates
-    return templates.TemplateResponse("base.html", {"request": request, "error": "An internal error occurred. Please try again."}, status_code=500)
+    return templates.TemplateResponse("errors/500.html", {"request": request}, status_code=500)
+
+
+@app.exception_handler(Exception)
+async def generic_error_handler(request: Request, exc):
+    logger.exception("Unhandled exception: %s", exc)
+    from fastapi.responses import HTMLResponse
+    from template_utils import templates
+    return templates.TemplateResponse("errors/500.html", {"request": request}, status_code=500)
 
 
 @app.middleware("http")
@@ -111,7 +153,8 @@ from template_utils import templates
 templates.env.globals["now"] = datetime.utcnow
 
 
-from routers import auth, admin, trainer, learner, courses, cohorts, assessments, attendance, certificates as cert_router, reports, notifications, dashboard, v2_1, observer, external_assessor
+from routers import auth, admin, trainer, learner, courses, cohorts, assessments, attendance, certificates as cert_router, reports, notifications, dashboard, v2_1, observer, external_assessor, training_plans, question_bank, api as api_router
+from routers.admin import enrolment_router
 
 app.include_router(auth.router, dependencies=[Depends(validate_csrf)])
 app.include_router(dashboard.router)
@@ -128,6 +171,10 @@ app.include_router(notifications.router, dependencies=[Depends(validate_csrf)])
 app.include_router(v2_1.router, dependencies=[Depends(validate_csrf)])
 app.include_router(observer.router, dependencies=[Depends(validate_csrf)])
 app.include_router(external_assessor.router, dependencies=[Depends(validate_csrf)])
+app.include_router(training_plans.router, dependencies=[Depends(validate_csrf)])
+app.include_router(enrolment_router, dependencies=[Depends(validate_csrf)])
+app.include_router(question_bank.router, dependencies=[Depends(validate_csrf)])
+app.include_router(api_router.router)
 
 
 @app.get("/")

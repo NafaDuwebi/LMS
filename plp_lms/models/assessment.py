@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Float, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy.sql import func
 from database import Base
 
@@ -66,3 +66,17 @@ class QuestionBank(Base):
     created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     is_active = Column(Boolean, default=True)
+
+    bank_options = relationship("QuestionBankOption", back_populates="bank_question", cascade="all, delete-orphan")
+
+
+class QuestionBankOption(Base):
+    __tablename__ = "question_bank_options"
+
+    id = Column(Integer, primary_key=True, index=True)
+    bank_question_id = Column(Integer, ForeignKey("question_bank.id"), nullable=False)
+    option_text = Column(Text, nullable=False)
+    is_correct = Column(Boolean, default=False)
+    option_label = Column(String(1), nullable=True)
+
+    bank_question = relationship("QuestionBank", back_populates="bank_options")

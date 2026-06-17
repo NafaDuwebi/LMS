@@ -44,6 +44,10 @@ def init_db():
     import models.rpl
     import models.report_subscription
     import models.system_settings
+    import models.training_plan
+    import models.department
     import models.retention
+    import models.enrolment_request
+    import models.material_view
     if os.getenv("ENV", "development") == "development":
         Base.metadata.create_all(bind=engine)

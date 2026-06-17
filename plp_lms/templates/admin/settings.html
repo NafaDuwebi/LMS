@@ -5,7 +5,7 @@
 {% block content %}
 <div class="max-w-2xl mx-auto">
     <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold text-[#1A2B4A]">System Settings</h1>
+        <h1 class="text-2xl font-bold text-[#540032]">System Settings</h1>
     </div>
 
     {% if success %}
@@ -26,30 +26,30 @@
             <div>
                 <label for="org_name" class="block text-sm font-medium text-gray-700 mb-1">Organization Name</label>
                 <input type="text" name="org_name" id="org_name" value="{{ settings['org_name'] }}" required aria-required="true"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-transparent outline-none transition-colors">
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-transparent outline-none transition-colors">
             </div>
 
             <div>
                 <label for="min_attendance" class="block text-sm font-medium text-gray-700 mb-1">Minimum Attendance (%)</label>
                 <input type="number" name="min_attendance" id="min_attendance" value="{{ settings['min_attendance'] }}" min="0" max="100" required aria-required="true"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-transparent outline-none transition-colors">
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-transparent outline-none transition-colors">
             </div>
 
             <div>
                 <label for="data_retention" class="block text-sm font-medium text-gray-700 mb-1">Data Retention (months)</label>
                 <input type="number" name="data_retention" id="data_retention" value="{{ settings['data_retention'] }}" min="1" required aria-required="true"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-transparent outline-none transition-colors">
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-transparent outline-none transition-colors">
             </div>
 
             <div>
                 <label for="max_upload" class="block text-sm font-medium text-gray-700 mb-1">Max Upload Size (MB)</label>
                 <input type="number" name="max_upload" id="max_upload" value="{{ settings['max_upload'] }}" min="1" required aria-required="true"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-transparent outline-none transition-colors">
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-transparent outline-none transition-colors">
             </div>
 
             <div class="pt-2">
                 <button type="submit"
-                        class="px-6 py-2.5 bg-[#1A2B4A] text-white font-medium rounded-lg hover:bg-[#243b60] transition-colors">
+                        class="px-6 py-2.5 bg-[#540032] text-white font-medium rounded-lg hover:bg-[#243b60] transition-colors">
                     <i class="fas fa-save mr-2"></i>Save Settings
                 </button>
             </div>

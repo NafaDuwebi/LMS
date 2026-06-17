@@ -2,11 +2,13 @@ import secrets, re, warnings
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+from sqlalchemy import func
 warnings.filterwarnings("ignore", message=".*bcrypt.*")
 from fastapi import Request, HTTPException, Depends
 from sqlalchemy.orm import Session
 from database import get_db
 from models.user import User
+from services.exceptions import RedirectException, GDPRConsentRequired, PasswordChangeRequired
 from config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, ACCOUNT_LOCKOUT_ATTEMPTS, ACCOUNT_LOCKOUT_MINUTES
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -37,27 +39,26 @@ def decode_token(token: str) -> dict:
 def get_current_user(request: Request, db: Session = Depends(get_db)):
     token = request.cookies.get("access_token")
     if not token:
-        raise HTTPException(status_code=302, headers={"Location": "/auth/login"})
+        raise RedirectException("/auth/login")
     payload = decode_token(token)
     user_id = payload.get("sub")
     if not user_id:
-        raise HTTPException(status_code=302, headers={"Location": "/auth/login"})
+        raise RedirectException("/auth/login")
     user = db.query(User).filter(User.id == int(user_id)).first()
     if not user or not user.is_active:
-        raise HTTPException(status_code=302, headers={"Location": "/auth/login"})
+        raise RedirectException("/auth/login")
     if payload.get("ver") != user.token_version:
-        raise HTTPException(status_code=302, headers={"Location": "/auth/login"})
+        raise RedirectException("/auth/login")
     exp = payload.get("exp")
     if exp:
         remaining = exp - datetime.utcnow().timestamp()
         if remaining < 900:
             request.state.refresh_token = create_access_token({"sub": user.id, "role": user.role, "ver": user.token_version})
     if user.force_password_change:
-        from fastapi.responses import RedirectResponse
-        if "/auth/change-password" not in str(request.url):
-            raise HTTPException(status_code=302, headers={"Location": "/auth/change-password"})
-    if user.requires_gdpr_consent and "/auth/gdpr-consent" not in str(request.url):
-        raise HTTPException(status_code=302, headers={"Location": "/auth/gdpr-consent"})
+        if "/auth/change-password" not in str(request.url) and "/auth/first-login" not in str(request.url):
+            raise PasswordChangeRequired()
+    if user.requires_gdpr_consent and "/auth/gdpr-consent" not in str(request.url) and "/auth/first-login" not in str(request.url):
+        raise GDPRConsentRequired()
     return user
 
 
@@ -102,14 +103,42 @@ def reset_failed_attempts(db: Session, user: User):
     db.commit()
 
 
+def _normalize_username_root(username: str) -> str:
+    """Strip trailing digits to get the shared root."""
+    return re.sub(r"\d+$", "", username)
+
+
+def username_root_conflict(db: Session, username: str, exclude_user_id: int = None) -> bool:
+    """Check if any existing username differs only by trailing digits from the given username."""
+    root = _normalize_username_root(username)
+    if not root:
+        return False
+    query = db.query(User).filter(func.lower(User.username) == root.lower())
+    if exclude_user_id:
+        query = query.filter(User.id != exclude_user_id)
+    if query.first():
+        return True
+    root_like = root + "%"
+    query2 = db.query(User).filter(User.username.ilike(root_like))
+    if exclude_user_id:
+        query2 = query2.filter(User.id != exclude_user_id)
+    for u in query2.all():
+        if _normalize_username_root(u.username) == root and u.username.lower() != username.lower():
+            return True
+    return False
+
+
 def safe_username(db, email):
     base = email.split("@")[0].lower()[:50]
-    username = base
-    counter = 1
-    while db.query(User).filter(User.username == username).first():
-        username = f"{base}{counter}"
-        counter += 1
-    return username
+    base = re.sub(r"\d+$", "", base).rstrip("_")
+    if db.query(User).filter(func.lower(User.username) == base.lower()).first() or username_root_conflict(db, base):
+        counter = 1
+        while True:
+            candidate = f"{base}_{counter}"
+            if not db.query(User).filter(func.lower(User.username) == candidate.lower()).first() and not username_root_conflict(db, candidate):
+                return candidate
+            counter += 1
+    return base
 
 
 def create_setup_token(db, user_id):

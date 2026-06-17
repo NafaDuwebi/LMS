@@ -3,12 +3,12 @@
 {% block content %}
 <div class="max-w-5xl mx-auto px-4 py-6">
     <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold" style="color: #1A2B4A;"><i class="fas fa-certificate mr-2" style="color: #C9912B;"></i> Training Record</h1>
-        <button onclick="window.print()"
-                class="inline-flex items-center px-4 py-2 rounded font-semibold text-sm transition"
-                style="background-color: #C9912B; color: #fff;">
-            <i class="fas fa-file-pdf mr-2"></i> Download as PDF
-        </button>
+        <h1 class="text-2xl font-bold" style="color: #540032;"><i class="fas fa-certificate mr-2" style="color: #FFC000;"></i> Training Record</h1>
+        <a href="/learner/training-record/download"
+           class="inline-flex items-center px-4 py-2 rounded font-semibold text-sm transition"
+           style="background-color: #FFC000; color: #fff;">
+            <i class="fas fa-file-pdf mr-2"></i> Download Transcript
+        </a>
     </div>
 
     {% if success %}
@@ -23,7 +23,7 @@
     {% endif %}
 
     <div class="bg-white rounded-lg shadow-sm border overflow-hidden mb-6">
-        <div class="px-5 py-4 border-b" style="background-color: #1A2B4A;">
+        <div class="px-5 py-4 border-b" style="background-color: #540032;">
             <h2 class="text-lg font-semibold text-white"><i class="fas fa-graduation-cap mr-2"></i> Completed Courses</h2>
         </div>
         {% if enrolments %}
@@ -39,7 +39,7 @@
             <tbody class="divide-y">
                 {% for e in enrolments %}
                 <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3 font-medium" style="color: #1A2B4A;">{{ e.cohort.course.title }}</td>
+                    <td class="px-4 py-3 font-medium" style="color: #540032;">{{ e.cohort.course.title }}</td>
                     <td class="px-4 py-3 text-gray-600">{{ e.cohort.name }}</td>
                     <td class="px-4 py-3 text-center">{{ e.final_score }}%</td>
                     <td class="px-4 py-3 text-center">
@@ -55,7 +55,7 @@
     </div>
 
     <div class="bg-white rounded-lg shadow-sm border overflow-hidden mb-6">
-        <div class="px-5 py-4 border-b" style="background-color: #1A2B4A;">
+        <div class="px-5 py-4 border-b" style="background-color: #540032;">
             <h2 class="text-lg font-semibold text-white"><i class="fas fa-award mr-2"></i> Certificates</h2>
         </div>
         {% if certificates %}
@@ -72,13 +72,13 @@
             <tbody class="divide-y">
                 {% for c in certificates %}
                 <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3 font-mono text-xs" style="color: #1A2B4A;">{{ c.certificate_number }}</td>
+                    <td class="px-4 py-3 font-mono text-xs" style="color: #540032;">{{ c.certificate_number }}</td>
                     <td class="px-4 py-3 text-gray-600">{{ c.course.title }}</td>
                     <td class="px-4 py-3 text-center text-gray-600">{{ c.issued_at.strftime('%d %b %Y') }}</td>
                     <td class="px-4 py-3 text-center text-gray-600">{{ c.expiry_date.strftime('%d %b %Y') if c.expiry_date else 'N/A' }}</td>
                     <td class="px-4 py-3 text-center">
                          <a href="/certificates/{{ c.id }}/download"
-                           class="text-sm font-medium hover:underline" style="color: #C9912B;" aria-label="Download certificate">
+                           class="text-sm font-medium hover:underline" style="color: #FFC000;" aria-label="Download certificate">
                             <i class="fas fa-download"></i>
                         </a>
                     </td>
@@ -92,7 +92,7 @@
     </div>
 
     <div class="bg-white rounded-lg shadow-sm border overflow-hidden mb-6">
-        <div class="px-5 py-4 border-b" style="background-color: #1A2B4A;">
+        <div class="px-5 py-4 border-b" style="background-color: #540032;">
             <h2 class="text-lg font-semibold text-white"><i class="fas fa-external-link-alt mr-2"></i> External Training</h2>
         </div>
         {% if external %}
@@ -110,13 +110,13 @@
             <tbody class="divide-y">
                 {% for t in external %}
                 <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3 font-medium" style="color: #1A2B4A;">{{ t.title }}</td>
+                    <td class="px-4 py-3 font-medium" style="color: #540032;">{{ t.title }}</td>
                     <td class="px-4 py-3 text-gray-600">{{ t.provider }}</td>
                     <td class="px-4 py-3 text-center text-gray-600">{{ t.record_type|title }}</td>
                     <td class="px-4 py-3 text-center text-gray-600">{{ t.completion_date.strftime('%d %b %Y') if t.completion_date else '&mdash;'|safe }}</td>
                     <td class="px-4 py-3 text-center text-gray-600">{{ t.hours }}</td>
                     <td class="px-4 py-3 text-center">
-                        <a href="/learner/training-record/{{ t.id }}/edit" class="text-[#C9912B] hover:text-[#b07d26] transition mr-2" title="Edit" aria-label="Edit">
+                        <a href="/learner/training-record/{{ t.id }}/edit" class="text-[#FFC000] hover:text-[#b07d26] transition mr-2" title="Edit" aria-label="Edit">
                             <i class="fas fa-edit"></i>
                         </a>
                         <form method="POST" action="/learner/training-record/{{ t.id }}/delete" class="inline" data-confirm="Are you sure you want to delete this training record? This cannot be undone.">
@@ -136,8 +136,8 @@
     </div>
 
     <div class="bg-white rounded-lg shadow-sm border p-6">
-        <h2 class="text-lg font-semibold mb-4" style="color: #1A2B4A;">
-            <i class="fas {% if edit_record %}fa-edit{% else %}fa-plus-circle{% endif %} mr-2" style="color: #C9912B;"></i>
+        <h2 class="text-lg font-semibold mb-4" style="color: #540032;">
+            <i class="fas {% if edit_record %}fa-edit{% else %}fa-plus-circle{% endif %} mr-2" style="color: #FFC000;"></i>
             {% if edit_record %}Edit External Training{% else %}Add External Training{% endif %}
         </h2>
         <form method="POST" action="{% if edit_record %}/learner/training-record/{{ edit_record.id }}/edit{% else %}/learner/training-record/add{% endif %}" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -146,21 +146,21 @@
                 <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
                 <input type="text" id="title" name="title" aria-required="true"
                        class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2"
-                       style="focus:ring-color: #C9912B;" required
+                       style="focus:ring-color: #FFC000;" required
                        value="{{ edit_record.title if edit_record else '' }}">
             </div>
             <div>
                 <label for="provider" class="block text-sm font-medium text-gray-700 mb-1">Provider</label>
                 <input type="text" id="provider" name="provider" aria-required="true"
                        class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2"
-                       style="focus:ring-color: #C9912B;" required
+                       style="focus:ring-color: #FFC000;" required
                        value="{{ edit_record.provider if edit_record else '' }}">
             </div>
             <div>
                 <label for="record_type" class="block text-sm font-medium text-gray-700 mb-1">Record Type</label>
                 <select id="record_type" name="record_type"
                         class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2"
-                        style="focus:ring-color: #C9912B;">
+                        style="focus:ring-color: #FFC000;">
                     <option value="certificate" {% if edit_record and edit_record.record_type == 'certificate' %}selected{% endif %}>Certificate</option>
                     <option value="workshop" {% if edit_record and edit_record.record_type == 'workshop' %}selected{% endif %}>Workshop</option>
                     <option value="seminar" {% if edit_record and edit_record.record_type == 'seminar' %}selected{% endif %}>Seminar</option>
@@ -172,14 +172,14 @@
                 <label for="completion_date" class="block text-sm font-medium text-gray-700 mb-1">Completion Date</label>
                 <input type="date" id="completion_date" name="completion_date" aria-required="true"
                        class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2"
-                       style="focus:ring-color: #C9912B;" required
+                       style="focus:ring-color: #FFC000;" required
                        value="{{ edit_record.completion_date.strftime('%Y-%m-%d') if edit_record and edit_record.completion_date else '' }}">
             </div>
             <div>
                 <label for="hours" class="block text-sm font-medium text-gray-700 mb-1">Hours</label>
                 <input type="number" id="hours" name="hours" step="0.5" min="0" aria-required="true"
                        class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2"
-                       style="focus:ring-color: #C9912B;" required
+                       style="focus:ring-color: #FFC000;" required
                        value="{{ edit_record.hours if edit_record else '' }}">
             </div>
             <div class="md:col-span-2 flex items-end pt-2 gap-2">
@@ -191,7 +191,7 @@
                 {% endif %}
                 <button type="submit"
                         class="px-5 py-2 rounded font-semibold text-sm transition"
-                        style="background-color: #C9912B; color: #fff;">
+                        style="background-color: #FFC000; color: #fff;">
                     <i class="fas {% if edit_record %}fa-save{% else %}fa-plus{% endif %} mr-1"></i>
                     {% if edit_record %}Save Changes{% else %}Add Record{% endif %}
                 </button>

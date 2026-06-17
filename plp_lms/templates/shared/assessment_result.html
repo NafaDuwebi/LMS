@@ -3,14 +3,22 @@
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="mb-6">
-    <a href="/assessments/{{ assessment.id }}" class="text-sm text-gray-500 hover:text-[#C9912B] transition">
+    <a href="/assessments/{{ assessment.id }}" class="text-sm text-gray-500 hover:text-[#FFC000] transition">
       <i class="fas fa-arrow-left mr-1"></i>Back to Assessment
     </a>
   </div>
 
   <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-8">
     <div class="text-center">
-      {% if submission.passed %}
+      {% if unscored_exists %}
+      <div class="bg-blue-50 border border-blue-200 text-blue-800 rounded-lg p-4 inline-block">
+        <i class="fas fa-clock mr-2"></i>Submitted — Awaiting review by your trainer.
+      </div>
+      {% elif submission.status == 'submitted' and assessment.type in ['written', 'short_answer', 'mixed'] %}
+      <div class="bg-blue-50 border border-blue-200 text-blue-800 rounded-lg p-4 inline-block">
+        <i class="fas fa-clock mr-2"></i>Submitted — Awaiting review by your trainer.
+      </div>
+      {% elif submission.passed %}
       <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-50 mb-4">
         <i class="fas fa-check-circle text-4xl text-green-500"></i>
       </div>
@@ -29,32 +37,39 @@
       <div class="relative pt-1">
         <div class="flex items-center justify-between mb-2">
           <span class="text-sm font-medium text-gray-600">Your Score</span>
-          <span class="text-sm font-bold text-[#1A2B4A]">{{ submission.score }}%</span>
+          <span class="text-sm font-bold text-[#540032]">{{ partial_score if unscored_exists else submission.score }}%</span>
         </div>
         <div class="w-full bg-gray-200 rounded-full h-3">
-          <div class="h-3 rounded-full {% if submission.passed %}bg-green-500{% else %}bg-red-400{% endif %}"
-               style="width: {{ submission.score }}%"></div>
+          <div class="h-3 rounded-full {% if submission.passed and not unscored_exists %}bg-green-500{% else %}bg-amber-400{% endif %}"
+               style="width: {{ partial_score if unscored_exists else submission.score }}%"></div>
         </div>
         <div class="flex justify-between mt-1 text-xs text-gray-400">
           <span>0%</span>
           <span>Pass: {{ assessment.pass_mark }}%</span>
           <span>100%</span>
         </div>
+        {% if unscored_exists %}
+        <p class="text-xs text-amber-600 mt-2"><i class="fas fa-info-circle mr-1"></i>Written section under review — final score pending</p>
+        {% endif %}
       </div>
     </div>
 
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 text-sm">
       <div class="bg-gray-50 rounded-lg p-3 text-center">
         <span class="block text-gray-400 text-xs uppercase tracking-wider">Status</span>
-        <span class="font-semibold text-[#1A2B4A] capitalize">{{ submission.status }}</span>
+        <span class="font-semibold text-[#540032] capitalize">{{ submission.status }}</span>
       </div>
       <div class="bg-gray-50 rounded-lg p-3 text-center">
         <span class="block text-gray-400 text-xs uppercase tracking-wider">Score</span>
-        <span class="font-semibold text-[#1A2B4A]">{{ submission.score }}%</span>
+        <span class="font-semibold text-[#540032]">{{ partial_score if unscored_exists else submission.score }}%</span>
       </div>
       <div class="bg-gray-50 rounded-lg p-3 text-center">
         <span class="block text-gray-400 text-xs uppercase tracking-wider">Passed</span>
-        {% if submission.passed %}
+        {% if unscored_exists %}
+        <span class="font-semibold text-blue-600"><i class="fas fa-clock mr-1"></i>Pending</span>
+        {% elif submission.status == 'submitted' and assessment.type in ['written', 'short_answer', 'mixed'] %}
+        <span class="font-semibold text-blue-600"><i class="fas fa-clock mr-1"></i>Pending</span>
+        {% elif submission.passed %}
         <span class="font-semibold text-green-600"><i class="fas fa-check mr-1"></i>Yes</span>
         {% else %}
         <span class="font-semibold text-red-400"><i class="fas fa-times mr-1"></i>No</span>
@@ -62,7 +77,7 @@
       </div>
       <div class="bg-gray-50 rounded-lg p-3 text-center">
         <span class="block text-gray-400 text-xs uppercase tracking-wider">Attempts Used</span>
-        <span class="font-semibold text-[#1A2B4A]">{{ submission.attempt_number }} / {{ assessment.max_attempts }}</span>
+        <span class="font-semibold text-[#540032]">{{ submission.attempt_number }} / {{ assessment.max_attempts }}</span>
       </div>
     </div>
 
@@ -75,14 +90,14 @@
   </div>
 
   <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8">
-    <h2 class="text-lg font-bold text-[#1A2B4A] mb-6"><i class="fas fa-list-ol mr-2"></i>Question Review</h2>
+    <h2 class="text-lg font-bold text-[#540032] mb-6"><i class="fas fa-list-ol mr-2"></i>Question Review</h2>
 
     <div class="space-y-6">
       {% for q in questions %}
       {% set answer = answers.get(q.id | string) or answers.get(q.id) %}
       <div class="border border-gray-200 rounded-lg p-5">
         <div class="flex items-start gap-3 mb-4">
-          <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#1A2B4A] text-white text-xs font-bold flex-shrink-0 mt-0.5">{{ loop.index }}</span>
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#540032] text-white text-xs font-bold flex-shrink-0 mt-0.5">{{ loop.index }}</span>
           <div class="flex-1">
             <div class="flex items-center gap-2">
               <p class="text-sm font-medium text-gray-800">{{ q.question_text }}</p>
@@ -152,12 +167,12 @@
 
   <div class="mt-6 text-center">
     <a href="/assessments/{{ assessment.id }}"
-       class="inline-flex items-center px-6 py-2.5 bg-[#1A2B4A] hover:bg-[#0f1d33] text-white text-sm font-medium rounded-lg transition">
+       class="inline-flex items-center px-6 py-2.5 bg-[#540032] hover:bg-[#0f1d33] text-white text-sm font-medium rounded-lg transition">
       <i class="fas fa-arrow-left mr-2"></i>Back to Assessment
     </a>
-    {% if not submission.passed and submission.attempt_number < assessment.max_attempts %}
+    {% if not unscored_exists and not submission.passed and submission.attempt_number < assessment.max_attempts %}
     <a href="{{ '/assessments/assessment.id/take' }}"
-       class="inline-flex items-center px-6 py-2.5 bg-[#C9912B] hover:bg-[#b07d26] text-white text-sm font-medium rounded-lg transition ml-3">
+       class="inline-flex items-center px-6 py-2.5 bg-[#FFC000] hover:bg-[#b07d26] text-white text-sm font-medium rounded-lg transition ml-3">
       <i class="fas fa-redo mr-2"></i>Retry
     </a>
     {% endif %}

@@ -11,6 +11,7 @@ if config.config_file_name is not None:
 from database import Base
 target_metadata = Base.metadata
 
+import models.department
 import models.user
 import models.course
 import models.cohort
@@ -25,8 +26,12 @@ import models.skill
 import models.document
 import models.message
 import models.rpl
+import models.system_settings
+import models.training_plan
 import models.report_subscription
 import models.retention
+import models.enrolment_request
+import models.material_view
 
 
 def run_migrations_offline() -> None:

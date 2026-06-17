@@ -11,6 +11,7 @@ from models.submission import Submission
 from models.notification import Notification
 from models.certificate import Certificate
 from models.audit import AuditLog
+from models.enrolment_request import EnrolmentRequest
 from services.auth_service import get_current_user
 from services.notification_service import get_unread_count
 from sqlalchemy import func
@@ -20,10 +21,14 @@ from template_utils import templates
 
 
 def get_common_context(request: Request, user: User, db: Session):
+    try:
+        unread = get_unread_count(db, user.id)
+    except Exception:
+        unread = 0
     return {
         "request": request,
         "user": user,
-        "unread_count": get_unread_count(db, user.id),
+        "unread_count": unread,
     }
 
 
@@ -52,6 +57,7 @@ def admin_dashboard(request, user, db):
         Certificate.revoked == False,
         Certificate.expiry_date.isnot(None),
     ).count()
+    pending_requests = db.query(EnrolmentRequest).filter(EnrolmentRequest.status == "pending").count()
 
     recent_enrolments = db.query(Enrolment).order_by(Enrolment.enrolled_at.desc()).limit(5).all()
 
@@ -63,6 +69,7 @@ def admin_dashboard(request, user, db):
         "total_courses": total_courses,
         "pending_marking": pending_marking,
         "expiring_certs": expiring_certs,
+        "pending_requests": pending_requests,
         "recent_enrolments": recent_enrolments,
     })
 
@@ -82,32 +89,51 @@ def trainer_dashboard(request, user, db):
 
     cohorts = db.query(Cohort).filter(Cohort.trainer_id == user.id).all()
 
+    pending_requests = db.query(EnrolmentRequest).filter(EnrolmentRequest.status == "pending").count()
+
     return templates.TemplateResponse("trainer/dashboard.html", {
         **get_common_context(request, user, db),
         "my_cohorts": my_cohorts,
         "pending_marking": pending,
         "upcoming_sessions": upcoming_sessions,
+        "pending_requests": pending_requests,
         "cohorts": cohorts,
     })
 
 
 def learner_dashboard(request, user, db):
-    enrolments = db.query(Enrolment).options(
-        joinedload(Enrolment.cohort).joinedload(Cohort.course)
-    ).filter(
-        Enrolment.user_id == user.id,
-        Enrolment.status.in_(["enrolled", "in_progress", "completed"]),
-    ).all()
+    import traceback, logging
+    logger = logging.getLogger("dashboard")
 
-    notifications = db.query(Notification).filter(
-        Notification.user_id == user.id, Notification.is_read == False
-    ).order_by(Notification.created_at.desc()).limit(5).all()
+    try:
+        enrolments = db.query(Enrolment).options(
+            joinedload(Enrolment.cohort).joinedload(Cohort.course)
+        ).filter(
+            Enrolment.user_id == user.id,
+            Enrolment.status.in_(["enrolled", "in_progress", "completed"]),
+        ).all()
+    except Exception as e:
+        logger.error(f"LIVE-19 enrolments error: {e}\n{traceback.format_exc()}")
+        enrolments = []
 
-    return templates.TemplateResponse("learner/dashboard.html", {
-        **get_common_context(request, user, db),
-        "enrolments": enrolments,
-        "notifications": notifications,
-    })
+    try:
+        notifications = db.query(Notification).filter(
+            Notification.user_id == user.id, Notification.is_read == False
+        ).order_by(Notification.created_at.desc()).limit(5).all()
+    except Exception as e:
+        logger.error(f"LIVE-19 notifications error: {e}\n{traceback.format_exc()}")
+        notifications = []
+
+    try:
+        ctx = get_common_context(request, user, db)
+        return templates.TemplateResponse("learner/dashboard.html", {
+            **ctx,
+            "enrolments": enrolments,
+            "notifications": notifications,
+        })
+    except Exception as e:
+        logger.error(f"LIVE-19 template/context error: {e}\n{traceback.format_exc()}")
+        raise
 
 
 def observer_dashboard(request, user, db):

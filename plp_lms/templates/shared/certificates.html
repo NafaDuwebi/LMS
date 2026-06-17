@@ -3,9 +3,9 @@
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 py-6">
     <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold" style="color: #1A2B4A;">Certificates</h1>
+        <h1 class="text-2xl font-bold" style="color: #540032;">Certificates</h1>
         {% if user and user.is_admin %}
-        <a href="{{ '/certificates/issue' }}" class="px-4 py-2 rounded text-white text-sm font-medium hover:opacity-90" style="background-color: #C9912B;">
+        <a href="{{ '/certificates/issue' }}" class="px-4 py-2 rounded text-white text-sm font-medium hover:opacity-90" style="background-color: #FFC000;">
             <i class="fas fa-plus mr-1"></i>Issue Certificate
         </a>
         {% endif %}
@@ -17,7 +17,7 @@
         <div class="bg-white rounded-lg shadow border {% if cert.revoked %}border-red-300{% else %}border-gray-200{% endif %} p-5 transition hover:shadow-md">
             <div class="flex items-start justify-between mb-3">
                 <div class="flex items-center gap-2">
-                    <i class="fas fa-certificate text-xl" style="color: #C9912B;"></i>
+                    <i class="fas fa-certificate text-xl" style="color: #FFC000;"></i>
                     <span class="text-xs font-mono text-gray-500">{{ cert.certificate_number }}</span>
                 </div>
                 {% if cert.revoked %}
@@ -40,12 +40,12 @@
 
             <div class="flex gap-2">
                 {% if cert.pdf_path %}
-                <a href="{{ '/certificates/cert.id/download' }}" class="flex-1 text-center px-3 py-2 rounded text-white text-sm font-medium hover:opacity-90" style="background-color: #1A2B4A;">
+                <a href="/certificates/{{ cert.id }}/download" class="flex-1 text-center px-3 py-2 rounded text-white text-sm font-medium hover:opacity-90" style="background-color: #540032;">
                     <i class="fas fa-download mr-1"></i>Download
                 </a>
                 {% endif %}
                 {% if user and user.is_admin and not cert.revoked %}
-                <form method="POST" action="{{ '/certificates/cert.id/revoke' }}" data-confirm="Are you sure you want to revoke this certificate? This cannot be undone.">
+                <form method="POST" action="/certificates/{{ cert.id }}/revoke" data-confirm="Are you sure you want to revoke this certificate? This cannot be undone.">
     <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
                     <input type="hidden" name="dummy_token" value="dummy">
                     <button type="submit" class="btn btn-danger px-3 py-2 rounded border border-red-300 text-red-600 text-sm font-medium hover:bg-red-50">

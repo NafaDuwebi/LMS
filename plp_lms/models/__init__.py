@@ -1,7 +1,7 @@
 from models.user import User
 from models.course import Course, LearningOutcome, Module, Material
 from models.cohort import Cohort, Enrolment, AttendanceRecord
-from models.assessment import Assessment, Question, AnswerOption, QuestionBank
+from models.assessment import Assessment, Question, AnswerOption, QuestionBank, QuestionBankOption
 from models.submission import Submission, Answer
 from models.certificate import Certificate
 from models.training_record import TrainingRecord
@@ -14,3 +14,5 @@ from models.message import Message
 from models.rpl import RplClaim
 from models.report_subscription import ReportSubscription
 from models.retention import RetentionLog
+from models.enrolment_request import EnrolmentRequest
+from models.material_view import MaterialView

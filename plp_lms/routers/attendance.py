@@ -82,28 +82,49 @@ def add_session(
 
 
 @router.post("/{cohort_id}/record", name="attendance.save")
-def record_attendance(
+async def record_attendance(
     cohort_id: int,
     request: Request,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    form_data = dict(request.form())
-    for key, value in form_data.items():
-        if key.startswith("attendance_"):
-            parts = key.split("_")
-            record_id = int(parts[1])
-            record = db.query(AttendanceRecord).filter(AttendanceRecord.id == record_id).first()
-            if record:
-                record.attended = value == "present"
-                record.recorded_by = user.id
+    form_data = await request.form()
+    cohort = db.query(Cohort).filter(Cohort.id == cohort_id).first()
+    if not cohort:
+        raise HTTPException(status_code=404)
+
+    all_records = db.query(AttendanceRecord).filter(
+        AttendanceRecord.cohort_id == cohort_id
+    ).all()
+    for record in all_records:
+        record.attended = False
 
     for key, value in form_data.items():
-        if key.startswith("notes_"):
-            record_id = int(key.split("_")[1])
-            record = db.query(AttendanceRecord).filter(AttendanceRecord.id == record_id).first()
-            if record:
-                record.notes = value
+        if key.startswith("attendance-"):
+            parts = key.split("-", 2)
+            if len(parts) == 3:
+                enrolment_id = int(parts[1])
+                session_date = date.fromisoformat(parts[2])
+                record = db.query(AttendanceRecord).filter(
+                    AttendanceRecord.enrolment_id == enrolment_id,
+                    AttendanceRecord.session_date == session_date,
+                ).first()
+                if record:
+                    record.attended = True
+                    record.recorded_by = user.id
+
+    for key, value in form_data.items():
+        if key.startswith("notes-"):
+            parts = key.split("-", 2)
+            if len(parts) == 3:
+                enrolment_id = int(parts[1])
+                session_date = date.fromisoformat(parts[2])
+                record = db.query(AttendanceRecord).filter(
+                    AttendanceRecord.enrolment_id == enrolment_id,
+                    AttendanceRecord.session_date == session_date,
+                ).first()
+                if record:
+                    record.notes = value
 
     db.commit()
     flash(request, "Attendance recorded", "success")

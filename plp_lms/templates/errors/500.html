@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>500 - Server Error | PLP LMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { primary: '#540032', accent: '#FFC000', 'primary-light': '#6B0040' },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col items-center justify-center px-4">
+    <div class="text-center max-w-md">
+        <div class="text-7xl font-bold" style="color: #FFC000;">500</div>
+        <h1 class="text-2xl font-semibold mt-4" style="color: #540032;">Internal Server Error</h1>
+        <p class="text-gray-600 mt-2">Something went wrong on our end. Please try again later.</p>
+        <p class="text-sm text-gray-500 mt-1">If the problem persists, please contact support.</p>
+        <a href="/dashboard" class="inline-flex items-center mt-6 px-5 py-2 rounded font-semibold text-sm transition" style="background-color: #540032; color: #fff;">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+        </a>
+    </div>
+    <footer class="mt-12 text-center text-sm text-gray-400">
+        <p>&copy; 2026 PL Projects Ltd. All rights reserved.</p>
+    </footer>
+</body>
+</html>

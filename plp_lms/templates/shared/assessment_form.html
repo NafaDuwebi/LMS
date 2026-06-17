@@ -3,13 +3,13 @@
 {% block content %}
 <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="mb-6">
-    <a href="{% if preselected_course_id %}/courses/{{ preselected_course_id }}{% else %}/assessments{% endif %}" class="text-sm text-gray-500 hover:text-[#C9912B] transition">
+    <a href="{% if preselected_course_id %}/courses/{{ preselected_course_id }}{% else %}/assessments{% endif %}" class="text-sm text-gray-500 hover:text-[#FFC000] transition">
       <i class="fas fa-arrow-left mr-1"></i>Back
     </a>
   </div>
 
   <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8">
-    <h1 class="text-2xl font-bold text-[#1A2B4A] mb-8">{% if assessment %}Edit Assessment{% else %}Create Assessment{% endif %}</h1>
+    <h1 class="text-2xl font-bold text-[#540032] mb-8">{% if assessment %}Edit Assessment{% else %}Create Assessment{% endif %}</h1>
 
     <form method="POST" action="{% if assessment %}/assessments/{{ assessment.id }}/edit{% else %}/assessments/create{% endif %}" class="space-y-6">
     <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
@@ -18,16 +18,16 @@
         <div class="sm:col-span-2">
           <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title <span class="text-red-500">*</span></label>
           <input type="text" id="title" name="title" value="{{ assessment.title if assessment else '' }}" required aria-required="true"
-                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-[#C9912B] outline-none transition text-sm">
+                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-[#FFC000] outline-none transition text-sm">
         </div>
 
         <div>
           <label for="course_id" class="block text-sm font-medium text-gray-700 mb-1">Course <span class="text-red-500">*</span></label>
           <select id="course_id" name="course_id" required aria-required="true"
-                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-[#C9912B] outline-none transition text-sm bg-white">
+                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-[#FFC000] outline-none transition text-sm bg-white">
             <option value="">Select a course</option>
             {% for c in courses %}
-            <option value="{{ c.id }}" {% if (assessment and assessment.course_id == c.id) or (preselected_course_id and preselected_course_id == c.id) %}selected{% endif %}>{{ c.title }}</option>
+            <option value="{{ c.id }}" {% if (assessment and assessment.course_id == c.id) or (preselected_course_id and preselected_course_id == c.id) %}selected{% endif %}>{{ c.title }}{% if not c.is_published %} [DRAFT]{% endif %}</option>
             {% endfor %}
           </select>
         </div>
@@ -35,7 +35,7 @@
         <div>
           <label for="module_id" class="block text-sm font-medium text-gray-700 mb-1">Module <span class="text-gray-400">(optional)</span></label>
           <select id="module_id" name="module_id"
-                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-[#C9912B] outline-none transition text-sm bg-white">
+                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-[#FFC000] outline-none transition text-sm bg-white">
             <option value="">No module</option>
             {% for m in modules %}
             <option value="{{ m.id }}">{{ m.title }}</option>
@@ -46,7 +46,7 @@
         <div>
           <label for="type" class="block text-sm font-medium text-gray-700 mb-1">Assessment Type <span class="text-red-500">*</span></label>
           <select id="type" name="type" required aria-required="true"
-                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-[#C9912B] outline-none transition text-sm bg-white">
+                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-[#FFC000] outline-none transition text-sm bg-white">
             <option value="">Select type</option>
             <option value="mcq" {% if assessment and assessment.type == 'mcq' %}selected{% endif %}>Multiple Choice</option>
             <option value="written" {% if assessment and assessment.type == 'written' %}selected{% endif %}>Written</option>
@@ -58,19 +58,19 @@
         <div>
           <label for="max_attempts" class="block text-sm font-medium text-gray-700 mb-1">Max Attempts</label>
           <input type="number" id="max_attempts" name="max_attempts" value="{{ assessment.max_attempts if assessment else 1 }}" min="1"
-                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-[#C9912B] outline-none transition text-sm">
+                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-[#FFC000] outline-none transition text-sm">
         </div>
 
         <div>
           <label for="pass_mark" class="block text-sm font-medium text-gray-700 mb-1">Pass Mark (%)</label>
-          <input type="number" id="pass_mark" name="pass_mark" value="{{ assessment.pass_mark if assessment else 50 }}" min="0" max="100"
-                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-[#C9912B] outline-none transition text-sm">
+          <input type="number" id="pass_mark" name="pass_mark" value="{{ assessment.pass_mark if assessment else (course_pass_marks[preselected_course_id] if preselected_course_id and preselected_course_id in course_pass_marks else 50) }}" min="0" max="100"
+                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-[#FFC000] outline-none transition text-sm">
         </div>
 
         <div>
           <label for="time_limit_mins" class="block text-sm font-medium text-gray-700 mb-1">Time Limit (minutes) <span class="text-gray-400">(optional)</span></label>
           <input type="number" id="time_limit_mins" name="time_limit_mins" value="{{ assessment.time_limit_mins if assessment else '' }}" min="0"
-                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9912B] focus:border-[#C9912B] outline-none transition text-sm">
+                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-[#FFC000] outline-none transition text-sm">
         </div>
       </div>
 
@@ -78,20 +78,23 @@
         <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wider">Options</h3>
 
         <label class="flex items-center space-x-3 cursor-pointer">
-          <input type="checkbox" name="randomise_questions" value="1" {% if assessment and assessment.randomise_questions %}checked{% endif %}
-                 class="w-4 h-4 rounded border-gray-300 text-[#C9912B] focus:ring-[#C9912B]">
+          <input type="hidden" name="randomise_questions" value="false">
+          <input type="checkbox" name="randomise_questions" value="true" {% if assessment and assessment.randomise_questions %}checked{% endif %}
+                 class="w-4 h-4 rounded border-gray-300 text-[#FFC000] focus:ring-[#FFC000]">
           <span class="text-sm text-gray-700">Randomise questions</span>
         </label>
 
         <label class="flex items-center space-x-3 cursor-pointer">
-          <input type="checkbox" name="randomise_options" value="1" {% if assessment and assessment.randomise_options %}checked{% endif %}
-                 class="w-4 h-4 rounded border-gray-300 text-[#C9912B] focus:ring-[#C9912B]">
+          <input type="hidden" name="randomise_options" value="false">
+          <input type="checkbox" name="randomise_options" value="true" {% if assessment and assessment.randomise_options %}checked{% endif %}
+                 class="w-4 h-4 rounded border-gray-300 text-[#FFC000] focus:ring-[#FFC000]">
           <span class="text-sm text-gray-700">Randomise answer options</span>
         </label>
 
         <label class="flex items-center space-x-3 cursor-pointer">
-          <input type="checkbox" name="release_results_immediately" value="1" {% if assessment and assessment.release_results_immediately %}checked{% endif %}
-                 class="w-4 h-4 rounded border-gray-300 text-[#C9912B] focus:ring-[#C9912B]">
+          <input type="hidden" name="release_results_immediately" value="false">
+          <input type="checkbox" name="release_results_immediately" value="true" {% if assessment and assessment.release_results_immediately %}checked{% endif %}
+                 class="w-4 h-4 rounded border-gray-300 text-[#FFC000] focus:ring-[#FFC000]">
           <span class="text-sm text-gray-700">Release results immediately after submission</span>
         </label>
       </div>
@@ -101,11 +104,31 @@
           Cancel
         </a>
         <button type="submit"
-                class="px-6 py-2.5 bg-[#C9912B] hover:bg-[#b07d26] text-white text-sm font-medium rounded-lg transition">
+                class="px-6 py-2.5 bg-[#FFC000] hover:bg-[#b07d26] text-white text-sm font-medium rounded-lg transition">
           <i class="fas fa-save mr-2"></i>{% if assessment %}Save Changes{% else %}Create Assessment{% endif %}
         </button>
       </div>
     </form>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{% if course_pass_marks %}
+<script>
+const passMarks = {{ course_pass_marks | tojson }};
+function syncPassMark(courseId) {
+  const pm = passMarks[courseId] ?? passMarks[parseInt(courseId)];
+  if (pm !== undefined) document.getElementById('pass_mark').value = pm;
+}
+document.getElementById('course_id').addEventListener('change', function() {
+  syncPassMark(this.value);
+});
+// Pre-fill on page load when a course is already selected
+document.addEventListener('DOMContentLoaded', function() {
+  const sel = document.getElementById('course_id');
+  if (sel && sel.value) syncPassMark(sel.value);
+});
+</script>
+{% endif %}
 {% endblock %}

@@ -3,8 +3,8 @@
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 py-6">
     <div class="flex items-center gap-3 mb-6">
-        <i class="fas fa-eye text-3xl" style="color: #C9912B;"></i>
-        <h1 class="text-2xl font-bold" style="color: #1A2B4A;">Observer Dashboard</h1>
+        <i class="fas fa-eye text-3xl" style="color: #FFC000;"></i>
+        <h1 class="text-2xl font-bold" style="color: #540032;">Observer Dashboard</h1>
     </div>
 
     {% if cohorts %}
@@ -17,15 +17,15 @@
             </div>
             <div class="space-y-2 text-sm text-gray-600">
                 <div class="flex items-center gap-2">
-                    <i class="fas fa-book w-4" style="color: #C9912B;"></i>
+                    <i class="fas fa-book w-4" style="color: #FFC000;"></i>
                     <span>{{ cohort.course.title if cohort.course else 'No course assigned' }}</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <i class="fas fa-user-graduate w-4" style="color: #C9912B;"></i>
+                    <i class="fas fa-user-graduate w-4" style="color: #FFC000;"></i>
                     <span>{{ cohort.enrolment_count if cohort.enrolment_count is defined else cohort.enrolments|length }} learners</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <i class="fas fa-calendar w-4" style="color: #C9912B;"></i>
+                    <i class="fas fa-calendar w-4" style="color: #FFC000;"></i>
                     <span>{{ cohort.start_date.strftime('%d %b %Y') if cohort.start_date else 'TBA' }} — {{ cohort.end_date.strftime('%d %b %Y') if cohort.end_date else 'TBA' }}</span>
                 </div>
             </div>
